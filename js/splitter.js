@@ -11,6 +11,9 @@ function splitNameAndMessage(text) {
 		++index;
 	}
 
+	// Makes sure there's no whitespace in the name
+	message.name = trim(message.name);
+
 	return message;
 }
 
@@ -81,3 +84,11 @@ var matches = [
 	}
 
 ];
+
+/* Remove multiple, leading or trailing spaces */
+function trim(s) {
+	s = s.replace(/(^\s*)|(\s*$)/gi,"");
+	s = s.replace(/[ ]{2,}/gi," ");
+	s = s.replace(/\n /,"\n");
+	return s;
+}

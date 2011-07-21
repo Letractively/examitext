@@ -17,39 +17,45 @@
 	function processMessage(text) {
 		var message = splitNameAndMessage(text);
 		message.content = applyStoplist(stemText(message.content));
-
-		document.write("<p>" + text + "</p>");
-		document.write("<p>" + message.name + " said:<br />" + message.content + "</p><hr />")
-
 		return message;
 	}
 
-	var text = "9:12 PM [Donald]: The stats on that fathom were unfathomable. The two teams will play an exciting rivalry game next week. The gymnast gingerly landed her triple backflip supreme. The incredulous cop cuffed the passenger of a van suspected of containing 13 kilos of cocaine. The criminals walked out of prison in a very nonchalant manner. In order to get anywhere in life one must abide by the rules of society. The cheesesteak will be digested by Steve in an hour or so. Steve can be such a pig...";
-	var text2 = "Donald says: Hey!";
-	var text3 = "Bob says\n Hello my good friend from the land of rain. How are you?";
-	var text4 = "Richard: Hello my good friend!";
-	var text5 = "The Nameless One: Who the hell are you?";
+	function processLog(log) {
+		// TODO: get a better way of differtiating each message 
+		var messagesAsText = log.split('\n');
+		var messages = [];
+		for (var i in messagesAsText) {
+			messages.push(processMessage(messagesAsText[i]));
+		}
+		return messages;
+	}
 
-	var message = processMessage(text);
-	processMessage(text2);
-	processMessage(text3);
-	processMessage(text4);
-	processMessage(text5);
+	var log = "[Donald]: The stats on that fathom were unfathomable. The two teams will play an exciting rivalry game next week. The gymnast gingerly landed her triple backflip supreme. The incredulous cop cuffed the passenger of a van suspected of containing 13 kilos of cocaine. The criminals walked out of prison in a very nonchalant manner. In order to get anywhere in life one must abide by the rules of society. The cheesesteak will be digested by Steve in an hour or so. Steve can be such a pig...\nDonald says: Hey!\nBob says: Hello my good friend from the land of rain. How are you?\nRichard: Hello my good friend!\nThe Nameless One: Who the hell are you?";
+	var messages = processLog(log);
 
 	document.write("<p>--END MESSAGE COLLECTION TEST--</p>");
 
-	var frequencies = getWordFrequencies([message]);
-	document.write("<h3>Word Frequences</h3><table>");
-	for (var i in frequencies["Donald"]) {
-		document.write("<tr><td>" + i + "</td><td>" + frequencies["Donald"][i] + "</td></tr>");
+	var messageStatistics = getParticipantStatistics(messages);
+
+	document.write("<table><tr><th>Name</th><th>Percent of Messages</th><td>Num Messages</th><th>Average Message Length</th><th>Average Message Density></th></tr>");
+	for (var name in messageStatistics) {
+		var participant = messageStatistics[name];
+		document.write("<tr><td>" + name + "</td><td>" + participant.percentOfMessages + "</td><td>" +
+			participant.numMessages + "</td><td>" +  participant.averageMessageLength + "</td><td>" +
+			participant.averageMessageDensity + "</td></tr>");
 	}
 	document.write("</table>");
 
-	var relFrequencies = getRelativeWordFrequencies(frequencies);
-	document.write("<h3>Relative Word Frequences</h3><table>");
-	document.write("<tr><td>Total Words</td><td>" + getTotalWordCount(frequencies["Donald"]) + "</td></tr>");
-	for (var i in relFrequencies["Donald"]) {
-		document.write("<tr><td>" + i + "</td><td>" + relFrequencies["Donald"][i] + "</td></tr>");
+	document.write("<h3>Word Frequencies</h3><table>");
+	for (var i in messageStatistics["Bob"].wordFrequency) {
+		document.write("<tr><td>" + i + "</td><td>" + messageStatistics["Bob"].wordFrequency[i] + "</td></tr>");
+	}
+	document.write("</table>");
+
+	document.write("<h3>Relative Word Frequencies</h3><table>");
+	document.write("<tr><td>Total Words</td><td>" + messageStatistics["Bob"].wordCount + "</td></tr>");
+	for (var i in messageStatistics["Bob"].relativeWordFrequency) {
+		document.write("<tr><td>" + i + "</td><td>" + messageStatistics["Bob"].relativeWordFrequency[i] + "</td></tr>");
 	}
 	document.write("</table>");
 
