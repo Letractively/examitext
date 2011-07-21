@@ -6,9 +6,10 @@
 function getWords(text) {
 	var words = text.split(" ");
 
-	// Only keeps alphanumeric characters in each word
+	// Removes non-alphanumeric characters from each word, EXCEPT for dashes!
+	// NOTE: Use /[^a-zA-Z0-9]+/g to remove dashes too
 	for (var i in words) {
-		words[i] = words[i].replace(/[^a-zA-Z 0-9]+/g, '');
+		words[i] = words[i].replace(/[^a-zA-Z0-9 -]+/g, '');
 		if (words[i] == "") words.splice(i, 1); // inefficient, change later
 	}
 
@@ -82,6 +83,46 @@ function getRelativeWordFrequencies(participants) {
 	return relFrequencies;
 }
 
+/* Takes an array of message objects and returns a map where the
+ * key is the name of each speaker and the value is their average
+ * message density. Message density is this context is defined
+ * as how many messages a person sends consecutively before
+ * someone else sends a message. */
+function getAverageMessageDensities(messages) {
+	var messageDensities = {};
+
+	// Makes sure messages is not an empty array (if so, will crash
+	// when accessing messages[0] below)
+	if (messages.length == 0) return {};
+
+	var currentName = messages[0].name;
+	var currentCount = 1;
+	for (var i = 1; (i < messages.length); ++i) {
+		var message = messages[i];
+		if (currentName != message.name) {
+			if (currentName in messageDensities) {
+				messageDensities[currentName].sum += currentCount;
+				messageDensities[currentName].amount += 1;
+			} else {
+				messageDensities[currentName] = {};
+				messageDensities[currentName].sum = currentCount;
+				messageDensities[currentName].amount = 1;
+			}
+			currentName = message.name;
+			currentCount = 0;
+		}
+		currentCount += 1;
+	}
+
+
+
+	var averageMessageDensities = {};
+	for (var name in messageDensities) {
+		averageMessageDensities[name] = messageDensities[name].sum / messageDensities[name].amount;
+	}
+	return averageMessageDensities;
+}
+
 
 
 /* This function collects ALL the statistics possible into an
@@ -94,13 +135,14 @@ function getParticipantStatistics(messages) {
 	general.totalMessages = 0;
 
 	// Acquire the sum of each participant's messages' lengths and the number
-	// of messages they've wrote 
+	// of messages they've wrote.
 	for (var i in messages) {
 		var message = messages[i];
 
 		if (message.name in participants) {
 			participants[message.name].averageMessageLength += message.content.length;
 			participants[message.name].numMessages += 1;
+
 			general.totalMessages += 1;
 		}
 		else {
@@ -108,6 +150,7 @@ function getParticipantStatistics(messages) {
 			participants[message.name] = {}
 			participants[message.name].averageMessageLength = message.content.length;
 			participants[message.name].numMessages = 1;
+
 			general.totalMessages += 1;
 		}
 	}
@@ -115,6 +158,7 @@ function getParticipantStatistics(messages) {
 	// Get the word (relative) frequencies for each participant
 	var wordFrequencies = getWordFrequencies(messages);
 	var relativeWordFrequencies = getRelativeWordFrequencies(wordFrequencies);
+	var averageMessageDensities = getAverageMessageDensities(messages);
 
 	// Now calculate the average message length and percent of messages constributed
 	// using the data acquired
@@ -124,20 +168,25 @@ function getParticipantStatistics(messages) {
 		participants[name].percentOfMessages = (
 			participants[name].numMessages / general.totalMessages) * 100;
 
-		participants[name].averageMessageDensity = 0; // TODO
-
 		// Also add the participants word frequency data to their object
 		if (name in wordFrequencies) {
 			participants[name].wordFrequency = wordFrequencies[name];
 			participants[name].relativeWordFrequency = relativeWordFrequencies[name];
+			participants[name].averageMessageDensity = averageMessageDensities[name];
 
 			participants[name].wordCount = getTotalWordCount(participants[name].wordFrequency);
+		} else {
+			participants[name].wordFrequency = {};
+			participants[name].relativeWordFrequence = {};
+			participants[name].averageMessageDensity = 0;
+			participants[name].wordCount = 0;
 		}
 	}
 
 	// If there's an empty string as a key in the map, rename it to Anonymous
 	if ("" in participants) {
 		participants["Anonymous"] = participants[""];
+		participants["Anonymous"].averageMessageDensity = 0;
 		delete participants[""];
 	}
 	// Add the general stats to the map so it can be returned as well

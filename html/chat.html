@@ -37,7 +37,7 @@
 
 	var messageStatistics = getParticipantStatistics(messages);
 
-	document.write("<table><tr><th>Name</th><th>Percent of Messages</th><td>Num Messages</th><th>Average Message Length</th><th>Average Message Density></th></tr>");
+	document.write("<table><tr><th>Name</th><th>Percent of Messages</th><th>Num Messages</th><th>Average Message Length</th><th>Average Message Density></th></tr>");
 	for (var name in messageStatistics) {
 		var participant = messageStatistics[name];
 		document.write("<tr><td>" + name + "</td><td>" + participant.percentOfMessages + "</td><td>" +
@@ -46,13 +46,13 @@
 	}
 	document.write("</table>");
 
-	document.write("<h3>Word Frequencies</h3><table>");
+	document.write("<h3>Word Frequencies for Bob</h3><table>");
 	for (var i in messageStatistics["Bob"].wordFrequency) {
 		document.write("<tr><td>" + i + "</td><td>" + messageStatistics["Bob"].wordFrequency[i] + "</td></tr>");
 	}
 	document.write("</table>");
 
-	document.write("<h3>Relative Word Frequencies</h3><table>");
+	document.write("<h3>Relative Word Frequencies for Bob</h3><table>");
 	document.write("<tr><td>Total Words</td><td>" + messageStatistics["Bob"].wordCount + "</td></tr>");
 	for (var i in messageStatistics["Bob"].relativeWordFrequency) {
 		document.write("<tr><td>" + i + "</td><td>" + messageStatistics["Bob"].relativeWordFrequency[i] + "</td></tr>");
