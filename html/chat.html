@@ -1,0 +1,36 @@
+<html>
+
+<head>
+	<title>Chat Analyser</title>
+
+	<script type="text/javascript" src="jquery-1.6.2.js"></script>
+	<script type="text/javascript" src="stemmer.js"></script>
+	<script type="text/javascript" src="stoplist.js"></script>
+</head>
+
+<body>
+
+	
+	<script type="text/javascript">
+	var text = "The stats on that fathom were unfathomable. The two teams will play an exciting rivalry game next week. The gymnast gingerly landed her triple backflip supreme. The incredulous cop cuffed the passenger of a van suspected of containing 13 kilos of cocaine. The criminals walked out of prison in a very nonchalant manner. In order to get anywhere in life one must abide by the rules of society. The cheesesteak will be digested by Steve in an hour or so.";
+
+	var stemmedText = "";
+	var words = text.split(" ");
+	for (var index in words) {
+		stemmedText += stemmer(words[index]) + " ";
+	}
+
+	stemmedText = applyStoplist(stemmedText);
+
+	document.write("<p>" + text + "</p>");
+	document.write("<p>" + stemmedText + "</p>")
+	document.write("<p>--END--</p>");
+	</script>
+
+	<!--<textarea name="rawText" rows="20" cols="60">Enter chat log here.</textarea>
+	<br />
+	<button onclick="anaylse()">Analyse</button>-->
+
+</body>
+
+</html>
