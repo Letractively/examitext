@@ -11,7 +11,6 @@
 //
 // CommonJS tweak by jedp
 
-
 var step2list = {
   "ational" : "ate",
   "tional" : "tion",
@@ -198,4 +197,14 @@ return memo[w];
 if (typeof exports != 'undefined' && exports != null) {
 exports.stemmer = stemmer;
 exports.memoizingStemmer = memoizingStemmer;
+}
+
+/* Stems a whole body of text, not just one word like stemmer() does. */
+function stemText(text) {
+  var stemmedText = "";
+  var words = text.split(" ");
+  for (var index in words) {
+    stemmedText += stemmer(words[index]) + " ";
+  }   
+  return stemmedText;
 }
