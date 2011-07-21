@@ -16,7 +16,9 @@ function splitNameAndMessage(text) {
 
 /* Each of these functions attempts to search for a different name
  * specifying format, return an empty string if the text doesn't
- * match that format. */
+ * match that format. There are multiple ways because the chat log
+ * the user provides could be formatted in any way, so as many format
+ * parsers as possible are provided to cover most cases. */
 var matches = [
 
 	/* If text contains something in square brackets which has a colon
