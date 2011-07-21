@@ -13,12 +13,25 @@
 
 	
 	<script type="text/javascript">
-	var text = "9:12 PM [Donald]: The stats on that fathom were unfathomable. The two teams will play an exciting rivalry game next week. The gymnast gingerly landed her triple backflip supreme. The incredulous cop cuffed the passenger of a van suspected of containing 13 kilos of cocaine. The criminals walked out of prison in a very nonchalant manner. In order to get anywhere in life one must abide by the rules of society. The cheesesteak will be digested by Steve in an hour or so.";
-	var message = splitNameAndMessage(text);
-	var finalText = applyStoplist(stemText(message.content));
+	function testText(text) {
+		var message = splitNameAndMessage(text);
+		var finalText = applyStoplist(stemText(message.content));
 
-	document.write("<p>" + text + "</p>");
-	document.write("<p>" + message.name + " said:<br />" + finalText + "</p>")
+		document.write("<p>" + text + "</p>");
+		document.write("<p>" + message.name + " said:<br />" + finalText + "</p><hr />")
+	}
+
+	var text = "9:12 PM [Donald]: The stats on that fathom were unfathomable. The two teams will play an exciting rivalry game next week. The gymnast gingerly landed her triple backflip supreme. The incredulous cop cuffed the passenger of a van suspected of containing 13 kilos of cocaine. The criminals walked out of prison in a very nonchalant manner. In order to get anywhere in life one must abide by the rules of society. The cheesesteak will be digested by Steve in an hour or so.";
+	var text2 = "Donald says: Hey!";
+	var text3 = "Bob says\n Hello my good friend from the land of rain. How are you?";
+	var text4 = "Richard: Hello my good friend!";
+	var text5 = "The Nameless One: Who the hell are you?";
+
+	testText(text);
+	testText(text2);
+	testText(text3);
+	testText(text4);
+	testText(text5);
 
 	document.write("<p>--END--</p>");
 	</script>
