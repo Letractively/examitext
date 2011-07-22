@@ -10,7 +10,12 @@ function getWords(text) {
 	// NOTE: Use /[^a-zA-Z0-9]+/g to remove dashes too
 	for (var i in words) {
 		words[i] = words[i].replace(/[^a-zA-Z0-9 -]+/g, '');
-		if (words[i] == "") words.splice(i, 1); // inefficient, change later
+	}
+	// Makes sure to rmeove any empty strings from the array
+	var index = words.indexOf('');
+	while (index != -1) {
+		words.splice(index, 1);
+		index = words.indexOf('');
 	}
 
 	// Removes the whitespace entries from the array
@@ -42,7 +47,7 @@ function getWordFrequencies(messages) {
 		}
 
 		var words = getWords(message.content);
-		for (var j in words) {
+		for (var j in words) {	
 			var word = words[j];
 			if (word in participants[message.name]) {
 				participants[message.name][word] += 1;

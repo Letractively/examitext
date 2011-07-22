@@ -17,10 +17,23 @@ jQuery.fn.center = function() {
 }
 
 /* Rounds a number to the specified amount of decimal places.
- *  num - Number to round
+ *  num - Number to round.
  *  dec - How many decimal places you want to round to.
  * Returns the rounded number. */
 function roundNumber(num, dec) {
 	var result = Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
 	return result;
+}
+
+/* Converts an object into an array of tuples, where each tuple
+ * contains a key and its respective value. Additionally, this
+ * function sorts the tuples by their second element (the values
+ * in the object). */
+function toSortedTuples(obj) {
+    var tuples = [];
+
+    for (var key in obj) tuples.push([key, obj[key]]);
+    tuples.sort(function(a, b) { return a[1] < b[1] ? 1 : a[1] > b[1] ? -1 : 0 });
+
+    return tuples;
 }

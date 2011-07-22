@@ -67,6 +67,9 @@ textarea { resize: none; width:100%; }
 /* Content level styles */
 .red { color: #F00; }
 .text_center { text-align: center; }
+.top0 { font-size: 18px; font-weight: bold; }
+.top1 { font-size: 16px; font-weight: bold; }
+.top2 { font-size: 14px; font-weight: bold; }
 
 
 /* Upload related classes. */
@@ -75,8 +78,11 @@ textarea { resize: none; width:100%; }
 
 
 /* Result related IDs/classes. */
-#tableContainer th { text-align: center; font-weight: bold; color: #48F; }
-#tableContainer td { text-align: center; }
+#resultsContainer table { margin: 30px; }
+#resultsContainer th { text-align: center; font-weight: bold; color: #48F; padding: 5px; }
+#resultsContainer td { text-align: center;}
+
+.topTable table { float: left; width: 300px; background-color: red; }
 
 #pieChartContainer { width: 760px; height: 300px; }
 
