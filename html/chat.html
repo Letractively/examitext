@@ -58,7 +58,7 @@
 					"'s Top 10 Words</span></th></tr><tr><th>Word</th><th>Frequency</th><th>Relative Frequency</th></tr>";
 				for (var i in topWords[name]) {
 					if (i >= 10) { // only go to top 10
-						break;
+						break;s
 					} else if (i >= 0 && i <= 2) { // large size fonts for top 3
 						current += "<tr><td><span class='top" + i + "'>" + topWords[name][i][0] +
 							"</span></td><td><span class='top" + i + "'>" + topWords[name][i][1] + "</span></td>" +
@@ -85,8 +85,9 @@
 			$("#tableContainer").html(statTable);
 			$("#wordsContainer").html(tableOfTables);
 			createPieChart("pieChartContainer", "Message Contribution", pieChartData);
-
 			$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a>");
+
+			$("#messageContainer").hide();
 			$("#formContainer").hide("fast");
 			$("#resultsContainer").hide();
 			$("#resultsContainer").show("fast");

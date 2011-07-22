@@ -23,7 +23,7 @@ function createPieChart(id, title, data) {
 
 		tooltip: {
 			formatter: function() {
-				return "<strong>" + this.point.name + "</strong>: " + this.y + "%";
+				return "<strong>" + this.point.name + "</strong>: " + roundNumber(this.y, 2) + "%";
 			}
 		},
 
@@ -36,7 +36,7 @@ function createPieChart(id, title, data) {
 					color: "#000000",
 					connectorColor: '#000000',
 					formatter: function() {
-						return "<strong>" + this.point.name + "</strong>: " + this.y + "%";
+						return "<strong>" + this.point.name + "</strong>: " + roundNumber(this.y, 2) + "%";
 					}
 				}
 			}

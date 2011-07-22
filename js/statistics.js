@@ -49,11 +49,24 @@ function getWordFrequencies(messages) {
 		var words = getWords(message.content);
 		for (var j in words) {	
 			var word = words[j];
+			/* NOTE: A really lame hack. If "constructor" is used as a key in
+			 * the map, it actually thinks I'm trying to assign a constructor
+			 * to the associative array (since they are the same as objects in
+			 * JavaScript). Just make all instances of "constructor" "_constructor"
+			 * to avoid the problem. */
+			if (word == "constructor") word = "_constructor";
 			if (word in participants[message.name]) {
 				participants[message.name][word] += 1;
 			} else {
 				participants[message.name][word] = 1;
 			}
+		}
+	}
+
+	for (var name in participants) {
+		for (var word in participants[name]) {
+			if (isNaN(participants[name][word]))
+				alert(word + " - " + participants[name][word])
 		}
 	}
 
@@ -67,6 +80,7 @@ function getTotalWordCount(wordFrequencies) {
 	for (var i in wordFrequencies) {
 		total += wordFrequencies[i];
 	}
+	alert(total)
 	return total;
 }
 
