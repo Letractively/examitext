@@ -3,23 +3,68 @@
 <head>
 	<title>Chat Analyser</title>
 
+	<!-- External libraries -->
 	<script type="text/javascript" src="../js/jquery-1.6.2.js"></script>
-	<script type="text/javascript" src="../js/splitter.js"></script>
+
+
 	<script type="text/javascript" src="../js/stemmer.js"></script>
 	<script type="text/javascript" src="../js/stoplist.js"></script>
 	<script type="text/javascript" src="../js/statistics.js"></script>
 	<script type="text/javascript" src="../js/log_processor.js"></script>
 	<script type="text/javascript">
+	function getText() {
+		var form = document.forms("logForm")
+		;
+		var localFile = form.elements["localFile"];
+		if (localFile.value != "") {
+			// LOAD FILE
+			// GET TEXT FROM IT
+		}
+
+		var rawText = form.elements["rawText"];
+		if (rawText.value != "") {
+			return rawText.value;
+		}
+
+		return "";
+	}
+
 	function analyse() {
-		window.alert(0);
+		// Get source text
+		var text = getText();
+		if (text != "") {
+			// Analyse text and get results
+			statistics = getParticipantStatistics(processLog(text));
+			// Interpret statistics
+						
+			// Create graphs from the results
+
+
+			$("#formContainer").hide("fast");
+			$("#resultsContainer").show("fast");
+		} else {
+			$("#messageContainer").hide();
+			$("#messageContainer").html("<p class='text_center red'><strong>No file or raw text provided.</strong></p>");
+			$("#messageContainer").show("slow").delay(3500).hide("slow");
+		}
 	}
 	</script>
 
 	<!-- Script for laying out the webpage-->
 	<script type="text/javascript">
-	$(document).ready(function() {
-		// TODOo
-	});
+	jQuery.fn.center_x = function() {
+		this.css("position","absolute");
+		this.css("left", (($(window).width() - this.outerWidth()) / 2) + $(window).scrollLeft() + "px");
+	}
+	jQuery.fn.center_y = function() {
+		this.css("position","absolute");
+		this.css("top", (($(window).height() - this.outerHeight()) / 2) + $(window).scrollTop() + "px");
+	}
+	jQuery.fn.center = function() {
+		this.center_x();
+		this.center_y();
+	    return this;
+	}
 	</script>
 
 	<link rel="stylesheet" type="text/css" href="../css/reset.css" />
@@ -42,12 +87,19 @@
 
 						<tr><td><strong>Raw Text:</strong></td></tr>
 
-						<tr><td colspan="2"><textarea rows="15" cols="150"></textarea></td></tr>
+						<tr><td colspan="2"><textarea name="rawText" rows="15" cols="150"></textarea></td></tr>
 					</table>
 				</form>
 				<br />
-				<a href="javascript:analyse()" class="analyseButton center">Analyse</a>
+				<a href="javascript:analyse()" class="analyseButton">Analyse</a>
 				<br />
+				<br />
+				<div id="messageContainer"></div>
+				<br />
+			</div>
+
+			<!-- Empty at the moment, just here so the div is created. -->
+			<div id="resultsContainer">
 			</div>
 		</div>
 
@@ -55,6 +107,12 @@
 			<p>Copyright 2011 Donald Whyte</p>
 		</div>
 	</div>
+
+	<!-- We center the container here since it's been populated with all
+	     its content by this point. -->
+	<script type="text/javascript">
+		$("#container").center();
+	</script>
 
 </body>
 
