@@ -63,17 +63,22 @@ textarea { resize: none; width:100%; }
 }
 #footer p { text-align: center; font-weight: bold; color: #FFF; }
 
+
 /* Content level styles */
 .red { color: #F00; }
 .text_center { text-align: center; }
-/* TODO: doesn't work!!! */
-.center {  display: block; margin: 0 auto; }
 
 
-
-/* Form related classes. */
+/* Upload related classes. */
 .form_table { width: 100%; }
-.textbox { width: 100%; }
+/*.textbox { width: 100%; }*/
+
+
+/* Result related IDs/classes. */
+#tableContainer th { text-align: center; font-weight: bold; color: #48F; }
+#tableContainer td { text-align: center; }
+
+#pieChartContainer { width: 760px; height: 300px; }
 
 
 /* Container classes */
@@ -102,7 +107,7 @@ textarea { resize: none; width:100%; }
 
 
 /* Generated using http://www.cssbuttongenerator.com/ */
-.analyseButton {
+.button {
 	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
 	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
 	box-shadow:inset 0px 1px 0px 0px #ffffff;
@@ -122,12 +127,16 @@ textarea { resize: none; width:100%; }
 	padding:6px 24px;
 	text-decoration:none;
 	text-shadow:1px 1px 0px #ffffff;
-}.analyseButton:hover {
+
+	/* Hack because the damn button won't centre no matter what I do. */
+	position: relative;
+	left: 340px;
+}.button:hover {
 	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed) );
 	background:-moz-linear-gradient( center top, #dfdfdf 5%, #ededed 100% );
 	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed');
 	background-color:#dfdfdf;
-}.analyseButton:active {
+}.button:active {
 	position:relative;
 	top:1px;
 }

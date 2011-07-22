@@ -9,67 +9,61 @@
 
 	<script type="text/javascript" src="../js/highcharts_wrapper.js"></script>
 
+	<script type="text/javascript" src="../js/util.js"></script>
 	<script type="text/javascript" src="../js/stemmer.js"></script>
 	<script type="text/javascript" src="../js/stoplist.js"></script>
 	<script type="text/javascript" src="../js/statistics.js"></script>
 	<script type="text/javascript" src="../js/log_processor.js"></script>
 	<script type="text/javascript">
+	/* Retrives text from the raw text area. */
 	function getText() {
-		var form = document.forms("logForm")
-		;
-		var localFile = form.elements["localFile"];
-		if (localFile.value != "") {
-			// LOAD FILE
-			// GET TEXT FROM IT
-		}
-
-		var rawText = form.elements["rawText"];
-		if (rawText.value != "") {
-			return rawText.value;
-		}
-
-		return "";
+		var rawText = document.forms("logForm").elements["rawText"];
+		return rawText.value;
 	}
 
+	/* Called when the analyse button is clicked. */
 	function analyse() {
 		// Get source text
 		var text = getText();
 		if (text != "") {
 			// Analyse text and get results
 			statistics = getLogStatistics(processLog(text));
-			// Interpret statistics
-			
-			// Create graphs from the results
-			var data = [ ];
-			for (var name in statistics.participants) {
-				data.push([name, statistics.participants[name].percentOfMessages]);
-			}
-			createPieChart("resultsContainer", "Message Contribution", data)
 
+			// Interpret statistics
+			var statTable =  "<table><th>Participant</th>" +
+			"<th>Percent of Messages</th><th>Number of Messages</th><th>Average Message " +
+			"Length</th><th>Average Message Density</th><th>Word Count</th>";
+			var pieChartData = [ ];
+
+			for (var name in statistics.participants) {
+				var participant = statistics.participants[name];
+				statTable += "<tr><td>" + name + "</td><td>" + roundNumber(participant.percentOfMessages, 2) +
+					"</td><td>" + participant.numMessages + "</td><td>" + roundNumber(participant.averageMessageLength, 2) +
+					"</td><td>" + roundNumber(participant.averageMessageDensity, 2) + "</td><td>" + participant.wordCount + "</tr>";
+				pieChartData.push([name, participant.percentOfMessages]);
+			}
+
+			statTable += "</table>";
+	
+			// Create tables/graphs from the results
+			$("#tableContainer").html(statTable);
+			createPieChart("pieChartContainer", "Message Contribution", pieChartData);
+
+			$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a>");
 			$("#formContainer").hide("fast");
+			$("#resultsContainer").hide();
 			$("#resultsContainer").show("fast");
 		} else {
 			$("#messageContainer").hide();
-			$("#messageContainer").html("<p class='text_center red'><strong>No file or raw text provided.</strong></p>");
+			$("#messageContainer").html("<p class='text_center red'><strong>Empty chat log provided.</strong></p>");
 			$("#messageContainer").show("slow").delay(3500).hide("slow");
 		}
 	}
-	</script>
 
-	<!-- Script for laying out the webpage-->
-	<script type="text/javascript">
-	jQuery.fn.center_x = function() {
-		this.css("position","absolute");
-		this.css("left", (($(window).width() - this.outerWidth()) / 2) + $(window).scrollLeft() + "px");
-	}
-	jQuery.fn.center_y = function() {
-		this.css("position","absolute");
-		this.css("top", (($(window).height() - this.outerHeight()) / 2) + $(window).scrollTop() + "px");
-	}
-	jQuery.fn.center = function() {
-		this.center_x();
-		this.center_y();
-	    return this;
+	function returnToUploader() {
+		$("#buttonContainer").html("<a href='javascript:analyse()'' class='button'>Analyse</a><br /><br />");
+		$("#resultsContainer").hide("fast");
+		$("#formContainer").show("fast");
 	}
 	</script>
 
@@ -89,23 +83,30 @@
 			<div id="formContainer">
 				<form name="logForm" action="#">
 					<table class="form_table">
-						<tr><td><strong>Upload File:</strong></td><td><input name="localFile" type="file" class="textbox" /></td></tr>
+						<!--<tr><td><strong>Upload File:</strong></td>
+						<td><input name="localFile" type="file" onchange="onFileChange()" /></td></tr>
+						<tr><td><strong>URL:</strong></tds>
+						<td><input name="url" type="text" class="textbox" onchange="onURLChange()" /></td></tr>-->
 
 						<tr><td><strong>Raw Text:</strong></td></tr>
-
 						<tr><td colspan="2"><textarea name="rawText" rows="15" cols="150"></textarea></td></tr>
 					</table>
 				</form>
-				<br />
-				<a href="javascript:analyse()" class="analyseButton">Analyse</a>
-				<br />
-				<br />
+				<!-- Contains messages (typically error messages) to show to the user. -->
 				<div id="messageContainer"></div>
 				<br />
 			</div>
 
 			<!-- Empty at the moment, just here so the div is created. -->
 			<div id="resultsContainer">
+				<div id="tableContainer"></div>
+				<div id="pieChartContainer"></div>
+			</div>
+
+			<div id="buttonContainer">
+				<a href="javascript:analyse()" class="button">Analyse</a>
+				<br />
+				<br />
 			</div>
 		</div>
 
@@ -118,6 +119,7 @@
 	     its content by this point. -->
 	<script type="text/javascript">
 		$("#container").center();
+		$("#resultsContainer").hide();
 	</script>
 
 </body>
