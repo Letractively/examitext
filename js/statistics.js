@@ -125,14 +125,15 @@ function getAverageMessageDensities(messages) {
 
 
 
-/* This function collects ALL the statistics possible into an
- * associative array where the key is a participant's and
- * the value is an object which contains statistics and that
- * participant. */
-function getParticipantStatistics(messages) {
+/* This function collects ALL the statistics implemented for a chat log.
+ * It returns an object with two attributes:
+ * participants : Associative array where the key is a participant's
+ *                and the value is an object which contains statistics
+ *                on that participant.
+ * totalMessages : Integer representing total messages in the chat log. */
+function getLogStatistics(messages) {
 	var participants = {};
-	var general = {}
-	general.totalMessages = 0;
+	var totalMessages = 0;
 
 	// Acquire the sum of each participant's messages' lengths and the number
 	// of messages they've wrote.
@@ -143,7 +144,7 @@ function getParticipantStatistics(messages) {
 			participants[message.name].averageMessageLength += message.content.length;
 			participants[message.name].numMessages += 1;
 
-			general.totalMessages += 1;
+			totalMessages += 1;
 		}
 		else {
 			// Create the participant object since it doesn't exist yet
@@ -151,7 +152,7 @@ function getParticipantStatistics(messages) {
 			participants[message.name].averageMessageLength = message.content.length;
 			participants[message.name].numMessages = 1;
 
-			general.totalMessages += 1;
+			totalMessages += 1;
 		}
 	}
 
@@ -162,11 +163,10 @@ function getParticipantStatistics(messages) {
 
 	// Now calculate the average message length and percent of messages constributed
 	// using the data acquired
-	var totalMessages = 0;
 	for (var name in participants) {
 		participants[name].averageMessageLength /= participants[name].numMessages;
 		participants[name].percentOfMessages = (
-			participants[name].numMessages / general.totalMessages) * 100;
+			participants[name].numMessages / totalMessages) * 100;
 
 		// Also add the participants word frequency data to their object
 		if (name in wordFrequencies) {
@@ -189,7 +189,10 @@ function getParticipantStatistics(messages) {
 		participants["Anonymous"].averageMessageDensity = 0;
 		delete participants[""];
 	}
-	// Add the general stats to the map so it can be returned as well
-	participants["__general"] = general;
-	return participants;
+
+	// Add the general stats and participant data to an object and return it
+	var stats = {};
+	stats.participants = participants;
+	stats.totalMessages = totalMessages;
+	return stats;
 }

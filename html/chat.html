@@ -5,7 +5,9 @@
 
 	<!-- External libraries -->
 	<script type="text/javascript" src="../js/jquery-1.6.2.js"></script>
+	<script type="text/javascript" src="../js/highcharts.js"></script>
 
+	<script type="text/javascript" src="../js/highcharts_wrapper.js"></script>
 
 	<script type="text/javascript" src="../js/stemmer.js"></script>
 	<script type="text/javascript" src="../js/stoplist.js"></script>
@@ -34,11 +36,15 @@
 		var text = getText();
 		if (text != "") {
 			// Analyse text and get results
-			statistics = getParticipantStatistics(processLog(text));
+			statistics = getLogStatistics(processLog(text));
 			// Interpret statistics
-						
+			
 			// Create graphs from the results
-
+			var data = [ ];
+			for (var name in statistics.participants) {
+				data.push([name, statistics.participants[name].percentOfMessages]);
+			}
+			createPieChart("resultsContainer", "Message Contribution", data)
 
 			$("#formContainer").hide("fast");
 			$("#resultsContainer").show("fast");
@@ -117,37 +123,3 @@
 </body>
 
 </html>
-
-<!-- Test code, just putting it here and commenting it out since I might need it in the future  -->
-<!--<script type="text/javascript">
-var log = "[Donald]: The stats on that fathom were unfathomable. The two teams will play an exciting rivalry game next week. The gymnast gingerly landed her triple backflip supreme. The incredulous cop cuffed the passenger of a van suspected of containing 13 kilos of cocaine. The criminals walked out of prison in a very nonchalant manner. In order to get anywhere in life one must abide by the rules of society. The cheesesteak will be digested by Steve in an hour or so. Steve can be such a pig...\nDonald says: Hey!\nBob says: Hello my good friend from the land of rain. How are you?\nRichard: Hello my good friend!\nThe Nameless One: Who the hell are you?";
-var messages = processLog(log);
-
-document.write("<p>--END MESSAGE COLLECTION TEST--</p>");
-
-var messageStatistics = getParticipantStatistics(messages);
-
-document.write("<table><tr><th>Name</th><th>Percent of Messages</th><th>Num Messages</th><th>Average Message Length</th><th>Average Message Density></th></tr>");
-for (var name in messageStatistics) {
-	var participant = messageStatistics[name];
-	document.write("<tr><td>" + name + "</td><td>" + participant.percentOfMessages + "</td><td>" +
-		participant.numMessages + "</td><td>" +  participant.averageMessageLength + "</td><td>" +
-		participant.averageMessageDensity + "</td></tr>");
-}
-document.write("</table>");
-
-document.write("<h3>Word Frequencies for Bob</h3><table>");
-for (var i in messageStatistics["Bob"].wordFrequency) {
-	document.write("<tr><td>" + i + "</td><td>" + messageStatistics["Bob"].wordFrequency[i] + "</td></tr>");
-}
-document.write("</table>");
-
-document.write("<h3>Relative Word Frequencies for Bob</h3><table>");
-document.write("<tr><td>Total Words</td><td>" + messageStatistics["Bob"].wordCount + "</td></tr>");
-for (var i in messageStatistics["Bob"].relativeWordFrequency) {
-	document.write("<tr><td>" + i + "</td><td>" + messageStatistics["Bob"].relativeWordFrequency[i] + "</td></tr>");
-}
-document.write("</table>");
-
-document.write("<p>--END STATISTICS TEST--</p>");
-</script>-->
