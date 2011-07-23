@@ -1,4 +1,4 @@
-/* This file c */
+/* This file contains fucntions that detail specifically with processing chat logs. */
 
 function processMessage(text) {
 	var message = splitNameAndMessage(text);

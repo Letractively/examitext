@@ -123,8 +123,6 @@ function getAverageMessageDensities(messages) {
 	return averageMessageDensities;
 }
 
-
-
 /* This function collects ALL the statistics implemented for a chat log.
  * It returns an object with two attributes:
  * participants : Associative array where the key is a participant's
@@ -133,10 +131,12 @@ function getAverageMessageDensities(messages) {
  * totalMessages : Integer representing total messages in the chat log. */
 function getLogStatistics(messages) {
 	var participants = {};
+	var receptionRates = {};
 	var totalMessages = 0;
 
 	// Acquire the sum of each participant's messages' lengths and the number
 	// of messages they've wrote.
+	var previousMessage = undefined;
 	for (var i in messages) {
 		var message = messages[i];
 
@@ -154,6 +154,8 @@ function getLogStatistics(messages) {
 
 			totalMessages += 1;
 		}
+
+		previousMessage = messages[i];
 	}
 
 	// Get the word (relative) frequencies for each participant
