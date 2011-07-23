@@ -44,6 +44,11 @@ textarea { resize: none; width:100%; }
 	font-weight: bold;
 	color: #FFF;
 	text-shadow:0px 2px 4px #858585;
+	/* text-shadow for IE. */
+  	height: 1.2em;
+  	filter: Shadow(Color=#858585, 
+                 Direction=180, 
+                 Strength=4);
 }
 
 
@@ -73,7 +78,7 @@ textarea { resize: none; width:100%; }
 
 
 /* Upload related classes. */
-.form_table { width: 100%; }
+.form_table { width: 780px; }
 /*.textbox { width: 100%; }*/
 
 
@@ -93,20 +98,21 @@ textarea { resize: none; width:100%; }
 	-webkit-border-radius: 20px;
 	-khtml-border-radius: 20px;
 	border-radius: 20px;
-	behavior: url(../css/border-radius.htc); /* Used for IE support */
-
-	position: relative
-	zoom: 1;
+	behavior: url(../js/PIE.htc);
 }
 .rounded_corners_top {
 	-moz-border-radius: 20px 20px 0px 0px;
 	-webkit-border-radius: 20px 20px 0px 0px;
 	-khtml-border-radius: 20px 20px 0px 0px;
 	border-radius: 20px 20px 0px 0px;
-	/* IE DOESN'T SUPPORT THIS TODO: GET BETTER BACKWARDS COMPATIBILITY!! */
+	behavior: url(../js/PIE.htc);
 }
 .rounded_corners_bottom {
-	/* IE DOESN'T SUPPORT THIS TODO: GET BETTER BACKWARDS COMPATIBILITY!! */
+	-moz-border-radius: 0px 0px 20px 20px;
+	-webkit-border-radius: 0px 00px 20px 20px;
+	-khtml-border-radius: 0px 0px 20px 20px;
+	border-radius: 0px 0px 20px 20px;
+	behavior: url(../js/PIE.htc);
 }
 
 
