@@ -1,12 +1,26 @@
-/* Stems a whole body of text, not just one word like stemmer() does. */
-function stemText(text) {
-  var stemmedText = "";
+/* Start of class Stemmer */
+
+function Stemmer(sanitiseFunction, stemFunction) {
+  this.sanitise = sanitiseFunction;
+  this.stemWord = stemFunction;
+}
+
+Stemmer.prototype.stemText = function(text) {
   var words = text.split(" ");
-  for (var index in words) {
-    stemmedText += stemmer(words[index]) + " ";
-  }   
+  var stemmedText = "";
+  for (var i in words) {
+    // TODO: may have problems with 'this' value on stemWord function
+    var sanitisedWord = this.sanitise(words[i]);
+    
+    // Only stem strings that aren't empty
+    if (sanitisedWord.length > 0) {
+      stemmedText += this.stemWord(sanitisedWord) + " ";
+    }
+  }
   return stemmedText;
 }
+
+/* End of class Stemmer */
 
 // Stemmer from: https://github.com/cwolves/stem/blob/master/en.js
 // implemented from algorithm at http://snowball.tartarus.org/algorithms/english/stemmer.html

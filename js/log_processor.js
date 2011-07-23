@@ -1,39 +1,104 @@
-/* This file contains fucntions that detail specifically with processing chat logs. */
+/* Start of class Participant */
+function Participant(name) {
+	this.name = name;
 
-function processMessage(text) {
-	var message = splitNameAndMessage(text);
-	message.content = applyStoplistToString(stemText(message.content));
-	return message;
+	this.messages = [];
+
+	this.wordFrequencies = {};
+	this.wordCount = 0;
+
+	this.averageMessageDensity = 0;
+	this.percentOfMessages = 0;
 }
 
-function processLog(log) {
-	// TODO: get a better way of differentiating each message 
-	var messagesAsText = log.split('\n');
-	var messages = [];
-	for (var i in messagesAsText) {
-		messages.push(processMessage(messagesAsText[i]));
+Participant.prototype.addMessage = function(messageContent) {
+	messageContent = trim(messageContent);
+	var words = messageContent.split(" ");
+	for (var i in words) {
+		if (words[i] == "") continue; // prevents empty strings getting through
+		this.addWord(words[i]);
 	}
-	return messages;
+
+	this.messages.push(messageContent);
 }
 
+Participant.prototype.addWord = function(word) {
+	if (word in this.wordFrequencies) {
+		this.wordFrequencies[word] += 1;
+	} else {
+		this.wordFrequencies[word] = 1;
+	}
+}
 
-/* Attempts to split the given text into a { name : message } pair,
- * where name is the name of the sender and message is the actual
- * content of the message. If no name is found, the name field is
- * just left blank. */
-function splitNameAndMessage(text) {
+Participant.prototype.getMessageCount = function() {
+	return this.messages.length;
+}
+
+Participant.prototype.getAverageMessageLength = function() {
+	var total = 0;
+	for (var i in this.messages) {
+		total += this.messages[i].length
+	}
+	return total / this.getMessageCount();
+}
+
+Participant.prototype.getAverageMessageDensity = function() {
+	return this.averageMessageDensity;
+}
+
+Participant.prototype.getRelativeWordFrequencies = function() {
+	var relativeFrequencies = {};
+	var total = this.getWordCount();
+	for (var word in this.wordFrequencies) {
+		relativeFrequencies[word] = this.wordFrequencies[word] / total;
+	}
+	return relativeFrequencies;
+}
+
+Participant.prototype.getWordCount = function() {
+	var total = 0;
+	for (var word in this.wordFrequencies) {
+		total += this.wordFrequencies[word];
+	}
+	return total;
+}
+
+Participant.prototype.getMostSaidWords = function(amount) {
+	// Sorts words by frequency, in descending order
+	var sortedWords = toSortedTuples(this.wordFrequencies);
+	var relativeWordFrequencies = this.getRelativeWordFrequencies();
+
+	var topWords = [];
+	var count = 0;
+	for (var i in sortedWords) {
+		topWords.push([ sortedWords[i][0], sortedWords[i][1],
+			relativeWordFrequencies[sortedWords[i][0]] ]);
+
+		count += 1;
+		if (count >= amount) break;
+	}
+	return topWords;
+}
+
+/* End of class Participants */
+
+/* Start of class Message */
+
+function Message(text, stemmer, stoplist) {
+	// Tries to find
 	var index = 0;
-	var message = { "name" : "", "content" : text };
-
-	while (index < matches.length && message.name == "") {
-		message = matches[index](text);
+	var values = { "name" : "", "content" : text };
+	while (index < Message.nameSearchers.length && values.name == "") {
+		values = Message.nameSearchers[index](text);
 		++index;
 	}
 
+	this.name = values.name
+	this.content = values.content;
 	// Makes sure there's no whitespace in the name
-	message.name = trim(message.name);
-
-	return message;
+	this.name = trim(values.name);
+	// Also applies the given stemmer and stoplist to the message's content
+	this.content = stoplist.apply(stemmer.stemText(this.content));
 }
 
 /* Each of these functions attempts to search for a different name
@@ -41,7 +106,7 @@ function splitNameAndMessage(text) {
  * match that format. There are multiple ways because the chat log
  * the user provides could be formatted in any way, so as many format
  * parsers as possible are provided to cover most cases. */
-var matches = [
+Message.nameSearchers = [
 
 	/* If text contains something in square brackets which has a colon
 	 * straight after it (e.g. "[Name]:Message"), then treat whatever is
@@ -104,6 +169,84 @@ var matches = [
 
 ];
 
+/* End of class Message */
+
+/* Start of class ChatStatistics */
+function ChatStatistics(messages) {
+	this.participants = {};
+	this.totalMessages = messages.length;
+
+	for (var i in messages) {
+		if (!(messages[i].name in this.participants)) {
+			this.participants[messages[i].name] = new Participant(messages[i].name);
+		}
+		this.participants[messages[i].name].addMessage(messages[i].content);
+	}
+
+	// Calculates each participant's message density separately.
+	if (messages.length >= 0) {
+		densities = {};
+
+		var currentName = messages[0].name;
+		var currentCount = 1;
+		for (var i = 1; (i < messages.length); ++i) {
+			var message = messages[i];
+			if (currentName != message.name) {
+				if (currentName in densities) {
+					densities[currentName].sum += currentCount;
+					densities[currentName].amount += 1;
+				} else {
+					densities[currentName] = {};
+					densities[currentName].sum = currentCount;
+					densities[currentName].amount = 1;
+				}
+				currentName = message.name;
+				currentCount = 0;
+			}
+			currentCount += 1;
+		}
+
+		for (var name in densities) {
+			this.participants[name].averageMessageDensity =
+				(densities[name].sum / densities[name].amount);
+		}
+	}
+
+	// Calculates percentage of messages each participant contributed
+	for (var name in this.participants) {
+		this.participants[name].percentOfMessages =
+			(this.participants[name].getMessageCount() / this.totalMessages) * 100;	
+	}
+
+	// Finally, renames blank entries into Anonymous
+	if ("" in this.participants) {
+		this.participants["Anonymous"] = this.participants[""];
+		delete this.participants[""];
+	}
+
+}
+
+ChatStatistics.prototype.getTotalWordCount = function() {
+	var total = 0;
+	for (var name in this.participants) {
+		total += this.participants[name].getWordCount();
+	}
+	return total;
+}
+
+ChatStatistics.prototype.getMessagePercentages = function() {
+	var percentages = [];
+	for (var name in this.participants) {
+		var percent = this.participants[name].getMessageCount() / this.totalMessages;
+		percentages.push([name, percent]);
+	}
+	return percentages;
+}
+
+/* End of class ChatStatistics */
+
+/* Start of utility functions. */
+
 /* Remove multiple, leading or trailing spaces */
 function trim(s) {
 	s = s.replace(/(^\s*)|(\s*$)/gi,"");
@@ -111,3 +254,48 @@ function trim(s) {
 	s = s.replace(/\n /,"\n");
 	return s;
 }
+
+/* Converts an object into an array of tuples, where each tuple
+ * contains a key and its respective value. Additionally, this
+ * function sorts the tuples by their second element (the values
+ * in the object). */
+function toSortedTuples(obj) {
+    var tuples = [];
+
+    for (var key in obj) tuples.push([key, obj[key]]);
+    tuples.sort(function(a, b) { return a[1] < b[1] ? 1 : a[1] > b[1] ? -1 : 0 });
+
+    return tuples;
+}
+
+/* Sanitises an English word by removing all non-alphanumeric characters,
+ * whitespace and not returning words less than 3 characters long. */
+function sanitiseWord(word) {
+	// Removes non-alphanumeric characters from the word, EXCEPT for dashes!
+	// NOTE: Use /[^a-zA-Z0-9]+/g to remove dashes too	
+	var sanitisedWord = word.replace(/[^a-zA-Z0-9-]+/g, '');
+	// Makes sure to return an empty string if the word is less than 3
+	// characters long. This tells the stemmer to just completely
+	// ignore the word.
+	if (sanitisedWord.length < 3) {
+		return "";
+	} else {
+		return sanitisedWord;
+	}
+}
+
+/* End of utility functions. */
+
+/* MAIN FUNCTION */
+function processLog(logText, stemmer, stoplist) {
+	var lines = logText.split("\n");
+	var messages = [];
+
+	for (var i in lines) {
+		messages.push(new Message(lines[i], stemmer, stoplist));
+	}
+
+	return messages;
+}
+
+/* END OF MAIN FUNCTION */

@@ -13,9 +13,23 @@
 	<script type="text/javascript" src="../js/util.js"></script>
 	<script type="text/javascript" src="../js/stemmer.js"></script>
 	<script type="text/javascript" src="../js/stoplist.js"></script>
-	<script type="text/javascript" src="../js/statistics.js"></script>
 	<script type="text/javascript" src="../js/log_processor.js"></script>
 	<script type="text/javascript">
+	/* Useful for dynamically placing elements at the centre of the screen. */
+	jQuery.fn.center_x = function() {
+		this.css("position","absolute");
+		this.css("left", (($(window).width() - this.outerWidth()) / 2) + $(window).scrollLeft() + "px");
+	}
+	jQuery.fn.center_y = function() {
+		this.css("position","absolute");
+		this.css("top", (($(window).height() - this.outerHeight()) / 2) + $(window).scrollTop() + "px");
+	}
+	jQuery.fn.center = function() {
+		this.center_x();
+		this.center_y();
+	    return this;
+	}
+	
 	/* Retrives text from the raw text area. */
 	function getText() {
 		var rawText = document.forms("logForm").elements["rawText"];
@@ -27,46 +41,44 @@
 		// Get source text
 		var text = getText();
 		if (text != undefined && text != "") {
-			// Analyse text and get results
-			statistics = getLogStatistics(processLog(text));
+			// Calclate statistics
+			var stemmerObject = new Stemmer(sanitiseWord, stemmer);
+			var stoplist = new Stoplist(STOP_LIST);
+			var messages = processLog(text, stemmerObject, stoplist);
+			var stats = new ChatStatistics(messages);
 
-			// Interpret statistics
+			// Now interpret them and show them
 			var statTable =  "<table><th>Participant</th>" +
 			"<th>Percent of Messages</th><th>Number of Messages</th><th>Average Message " +
 			"Length</th><th>Average Message Density</th><th>Word Count</th>";
 			var pieChartData = [ ];
-			var topWords = { }; // contains sorted list of words by frequency for EACH participant
-			var topWordsRelative = { };
 
-			for (var name in statistics.participants) {
-				var participant = statistics.participants[name];
+			for (var name in stats.participants) {
+				var participant = stats.participants[name];
 
 				statTable += "<tr><td>" + name + "</td><td>" + roundNumber(participant.percentOfMessages, 2) +
-					"</td><td>" + participant.numMessages + "</td><td>" + roundNumber(participant.averageMessageLength, 2) +
-					"</td><td>" + roundNumber(participant.averageMessageDensity, 2) + "</td><td>" + participant.wordCount + "</tr>";
+					"%</td><td>" + participant.getMessageCount() + "</td><td>" + roundNumber(participant.getAverageMessageLength(), 2) +
+					"</td><td>" + roundNumber(participant.getAverageMessageDensity(), 2) + "</td><td>" + participant.getWordCount() + "</tr>";
 				pieChartData.push([name, participant.percentOfMessages]);
-
-				topWords[name] = toSortedTuples(participant.wordFrequency);
-				topWordsRelative[name] = toSortedTuples(participant.relativeWordFrequency);
 			}
 
 			statTable += "</table>";
 
 			// Generates tables to show the top 10 words for each participant
 			var topWordTables = [];
-			for (var name in topWords) {
+			for (var name in stats.participants) {
 				var current = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" + name +
 					"'s Top 10 Words</span></th></tr><tr><th>Word</th><th>Frequency</th><th>Relative Frequency</th></tr>";
-				for (var i in topWords[name]) {
-					if (i >= 10) { // only go to top 10
-						break;s
-					} else if (i >= 0 && i <= 2) { // large size fonts for top 3
-						current += "<tr><td><span class='top" + i + "'>" + topWords[name][i][0] +
-							"</span></td><td><span class='top" + i + "'>" + topWords[name][i][1] + "</span></td>" +
-							"<td>" + roundNumber(topWordsRelative[name][i][1], 2) + "</td></tr>";
+
+				var topWords = stats.participants[name].getMostSaidWords(10);
+				for (var i in topWords) {
+					if (i >= 0 && i <= 2) { // large size fonts for top 3
+						current += "<tr><td><span class='top" + i + "'>" + topWords[i][0] +
+							"</span></td><td><span class='top" + i + "'>" + topWords[i][1] + "</span></td>" +
+							"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
 					} else {
-						current += "<tr><td>" + topWords[name][i][0] + "</td><td>" + topWords[name][i][1] + "</td>" +
-							"<td>" + roundNumber(topWordsRelative[name][i][1], 2) + "</td></tr>";
+						current += "<tr><td>" + topWords[i][0] + "</td><td>" + topWords[i][1] + "</td>" +
+							"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
 					}
 				}
 				current += "</table>";
@@ -81,6 +93,7 @@
 					tableOfTables += "<td>" + topWordTables[i] + "</td></tr>";
 				}
 			}
+
 	
 			// Create tables/graphs from the results
 			$("#tableContainer").html(statTable);
@@ -92,6 +105,8 @@
 			$("#formContainer").hide("fast");
 			$("#resultsContainer").hide();
 			$("#resultsContainer").show("fast");
+
+
 		} else {
 			$("#messageContainer").hide();
 			$("#messageContainer").html("<p class='text_center red'><strong>Empty chat log provided.</strong></p>");

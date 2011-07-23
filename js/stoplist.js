@@ -1,3 +1,23 @@
+/* Start of class Stoplist */
+
+function Stoplist(words) {
+	this.bannedWords = words;
+}
+
+Stoplist.prototype.apply = function(text) {
+	var words = text.split(" ");
+	var newText = "";
+	for (var i in words) {
+		var index = this.bannedWords.indexOf(words[i]);
+		if (index == -1) { // if word is NOT banned
+			newText += words[i] + " ";
+		}
+	}
+	return newText;
+}
+
+/* End of class Stoplist */
+
 // Freely available stopword list.  This stopword list provides a nice
 // balance between coverage and size.
 
@@ -501,28 +521,3 @@ var STOP_LIST = [
 	"mustve"
 
 ];
-
-/* Removes any instances of words in the stop list from the given text. */
-function applyStoplistToString(text) {
-	var words = text.split(" ");
-	var newText = "";
-
-	for (var index in words) {
-		var word = words[index].toLowerCase();
-		if ($.inArray(word, STOP_LIST) == -1) {
-			newText += word + " ";
-		}
-	}
-
-	return newText;
-}
-
-function applyStoplistToArray(words) {
-	for (var i = 0; (i < words.length); ++i) {
-		words[i] = words[i].toLowerCase();
-		if ($.inArray(words[i], STOP_LIST) >= 0) {
-			words.splice(i, 1);
-			i -= 1;
-		}
-	}
-}
