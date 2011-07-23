@@ -88,6 +88,7 @@ function Message(text, stemmer, stoplist) {
 	// Tries to find
 	var index = 0;
 	var values = { "name" : "", "content" : text };
+
 	while (index < Message.nameSearchers.length && values.name == "") {
 		values = Message.nameSearchers[index](text);
 		++index;

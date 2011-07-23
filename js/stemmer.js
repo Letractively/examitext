@@ -5,13 +5,12 @@ function Stemmer(sanitiseFunction, stemFunction) {
   this.stemWord = stemFunction;
 }
 
-Stemmer.prototype.stemText = function(text) {
+Stemmer.prototype.stemText = function(text) {    
   var words = text.split(" ");
   var stemmedText = "";
   for (var i in words) {
     // TODO: may have problems with 'this' value on stemWord function
     var sanitisedWord = this.sanitise(words[i]);
-    
     // Only stem strings that aren't empty
     if (sanitisedWord.length > 0) {
       stemmedText += this.stemWord(sanitisedWord) + " ";

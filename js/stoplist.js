@@ -8,7 +8,8 @@ Stoplist.prototype.apply = function(text) {
 	var words = text.split(" ");
 	var newText = "";
 	for (var i in words) {
-		var index = this.bannedWords.indexOf(words[i]);
+		var index = indexOf(this.bannedWords, words[i]);
+
 		if (index == -1) { // if word is NOT banned
 			newText += words[i] + " ";
 		}

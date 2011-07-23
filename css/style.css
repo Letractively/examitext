@@ -53,7 +53,7 @@ textarea { resize: none; width:100%; }
 
 
 /* Content */
-#content { padding: 10px; }
+#content { }
 
 
 /* Footer */
@@ -71,16 +71,32 @@ textarea { resize: none; width:100%; }
 
 /* Content level styles */
 .red { color: #F00; }
-.text_center { text-align: center; }
+.textCenter { text-align: center; }
 .top0 { font-size: 18px; font-weight: bold; }
 .top1 { font-size: 16px; font-weight: bold; }
 .top2 { font-size: 14px; font-weight: bold; }
 
+.featurePadding { float: left; width: 130px; min-height: 140px; height: 140px; max-height: 140px; background-color: #DDD; }
+.feature { float: left; width: 180px; min-height: 140px; height: 140px; max-height: 140px; background-color: #DDD; }
+.feature:hover, .feature:active, .selected { background-color: #AAA; }
+.feature img { text-align: center; display: block; margin: 0 auto; padding: 10px 0px; }
+.feature h1 {
+	float: bottom; text-align: center; font-size: 20px;
+	color: #CCC;
+	text-shadow: 0px 1px 2px #444; height: 1.4em;
+  	filter: Shadow(Color=#444, Direction=120, Strength=0);
+  	color: #666;
+}
+.feature:hover h1, .feature:active h1, .selected h1 { color: #DDD; }
+
+.flagPadding { float: left; width: 80px; min-height: 60px; height: 60px; max-height: 60px; background-color: #DDD; margin: 20px 0; }
+.flag { display: block; float: left; width: 80px; min-height: 60px; height: 60px; max-height: 60px; background-color: #DDD; margin: 20px 0; }
+.flag:hover, .flag:active, .selected { background-color: #AAA; }
+.flag img { text-align: center; display: block; margin: 0 auto; padding-bottom: 10px; }
+
 
 /* Upload related classes. */
-.form_table { width: 780px; }
-/*.textbox { width: 100%; }*/
-
+#formContainer table { width: 780px; position: relative; top: 10px; left: 10px; }
 
 /* Result related IDs/classes. */
 #resultsContainer table { margin: 30px; }
@@ -92,7 +108,7 @@ textarea { resize: none; width:100%; }
 #pieChartContainer { width: 760px; height: 300px; }
 
 
-/* Container classes */
+/* Other classes */
 .rounded_corners_all {
 	-moz-border-radius: 20px;
 	-webkit-border-radius: 20px;

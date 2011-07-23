@@ -10,3 +10,36 @@ function roundNumber(num, dec) {
 	return result;
 }
 
+
+/* IE hack. Global indexOf used so IE doesn't have any problems
+ * with it not being defined. */
+function indexOf(container, obj) {
+	for(var i = 0; i < container.length; i++) {
+		if(container[i] == obj) {
+			return i;
+        }
+    }
+    return -1;
+}
+
+/*
+if(!Array.indexOf) {
+    Array.indexOf = function(obj) {
+        for(var i = 0; i < this.length; i++) {
+            if(this[i] == obj) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}
+if(!String.indexOf) {
+    String.indexOf = function(obj) {
+        for(var i = 0; i < this.length; i++) {
+            if(this[i] == obj) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}*/
