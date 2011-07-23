@@ -1,0 +1,48 @@
+                                   Examitext
+                                 Version 0.1.0
+
+What is it?
+-----------
+
+A web application which examines text documents, chat logs and source code to
+provide meaningful statistics about them.
+	
+
+The Latest Version
+------------------
+
+The latest version can be downloaded from:
+http://code.google.com/p/examitext/
+
+Installation
+------------
+
+No installation required. Simply open examitext.html in any modern browser to
+run the application.
+
+Usage
+-----
+
+TODO
+
+Licensing
+---------
+
+Please read the file called LICENSE for the details on Chat Analyser's license.
+
+JQuery is used under the MIT License.
+
+Highcharts is used under the Creative Commons Attribution-NonCommercial 3.0
+License.
+
+CSS3 PIE is used under the terms of the Apache License Version 2.0, which can
+be read here: https://github.com/lojjic/PIE/blob/master/LICENSE-APACHE2.txt
+
+Authors and Contacts
+--------
+
+The project is managed and developed by Donald Whyte. To submit bugs,
+suggestions or feedback about Chat Analyser, go to the project page
+provided below:
+
+http://code.google.com/p/examitext/
