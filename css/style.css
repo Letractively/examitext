@@ -92,12 +92,11 @@ textarea { resize: none; width:100%; }
 	-moz-border-radius: 20px;
 	-webkit-border-radius: 20px;
 	-khtml-border-radius: 20px;
-	/* Used for IE support */
-	behavior: url(../css/border-radius.htc);
+	border-radius: 20px;
+	behavior: url(../css/border-radius.htc); /* Used for IE support */
+
 	position: relative
 	zoom: 1;
-
-	border-radius: 20px;
 }
 .rounded_corners_top {
 	-moz-border-radius: 20px 20px 0px 0px;
@@ -107,7 +106,6 @@ textarea { resize: none; width:100%; }
 	/* IE DOESN'T SUPPORT THIS TODO: GET BETTER BACKWARDS COMPATIBILITY!! */
 }
 .rounded_corners_bottom {
-
 	/* IE DOESN'T SUPPORT THIS TODO: GET BETTER BACKWARDS COMPATIBILITY!! */
 }
 
