@@ -430,11 +430,80 @@ var STOP_LIST = [
 	"youngest",
 	"your",
 	"yours",
-	"z"
+	"z",
+
+	// Contractions (with apostrophe omitted) added to original list
+	"im",
+	"ill",
+	"id",
+	"ive",
+	"youre",
+	"youll",
+	"youd",
+	"youve",
+	"youd",
+	"hes",
+	"hed",
+	"hes",
+	"shes",
+	"its",
+	"itll",
+	"itd",
+	"weve",
+	"theyre",
+	"theyll",
+	"theyd",
+	"thats",
+	"thatll",
+	"thatd",
+	"whos",
+	"wholl",
+	"whod",
+	"whats",
+	"whatre",
+	"whatll",
+	"whatd",
+	"wheres",
+	"wherell",
+	"whered",
+	"whens",
+	"whenll",
+	"whend",
+	"whys",
+	"whyll",
+	"whyd",
+	"hows",
+	"howll",
+	"howd",
+
+	"isnt",
+	"arent",
+	"wasnt",
+	"werent",
+	"havent",
+	"hasnt",
+	"hadnt",
+	"wont",
+	"wouldnt",
+	"dont",
+	"doesnt",
+	"didnt",
+	"cant",
+	"couldnt",
+	"shouldnt",
+	"mighnt",
+	"mustnt",
+
+	"wouldve",
+	"shouldve",
+	"couldve",
+	"mightve",
+	"mustve"
+
 ];
 
 /* Removes any instances of words in the stop list from the given text. */
-function applyStoplist(text) {
+function applyStoplistToString(text) {
 	var words = text.split(" ");
 	var newText = "";
 
@@ -446,4 +515,14 @@ function applyStoplist(text) {
 	}
 
 	return newText;
+}
+
+function applyStoplistToArray(words) {
+	for (var i = 0; (i < words.length); ++i) {
+		words[i] = words[i].toLowerCase();
+		if ($.inArray(words[i], STOP_LIST) >= 0) {
+			words.splice(i, 1);
+			i -= 1;
+		}
+	}
 }

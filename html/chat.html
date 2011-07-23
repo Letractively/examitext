@@ -25,7 +25,7 @@
 	function analyse() {
 		// Get source text
 		var text = getText();
-		if (text != "") {
+		if (text != undefined && text != "") {
 			// Analyse text and get results
 			statistics = getLogStatistics(processLog(text));
 

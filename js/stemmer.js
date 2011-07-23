@@ -1,204 +1,3 @@
-// Porter stemmer in Javascript. Few comments, but it's easy to follow against
-// the rules in the original paper, in
-//
-//  Porter, 1980, An algorithm for suffix stripping, Program, Vol. 14, no. 3,
-//  pp 130-137,
-//
-// see also http://www.tartarus.org/~martin/PorterStemmer
-
-// Release 1 be 'andargor', Jul 2004
-// Release 2 (substantially revised) by Christopher McKenzie, Aug 2009
-//
-// CommonJS tweak by jedp
-
-var step2list = {
-  "ational" : "ate",
-  "tional" : "tion",
-  "enci" : "ence",
-  "anci" : "ance",
-  "izer" : "ize",
-  "bli" : "ble",
-  "alli" : "al",
-  "entli" : "ent",
-  "eli" : "e",
-  "ousli" : "ous",
-  "ization" : "ize",
-  "ation" : "ate",
-  "ator" : "ate",
-  "alism" : "al",
-  "iveness" : "ive",
-  "fulness" : "ful",
-  "ousness" : "ous",
-  "aliti" : "al",
-  "iviti" : "ive",
-  "biliti" : "ble",
-  "logi" : "log"
-};
-
-var step3list = {
-  "icate" : "ic",
-  "ative" : "",
-  "alize" : "al",
-  "iciti" : "ic",
-  "ical" : "ic",
-  "ful" : "",
-  "ness" : ""
-};
-
-var c = "[^aeiou]";          // consonant
-var v = "[aeiouy]";          // vowel
-var C = c + "[^aeiouy]*";    // consonant sequence
-var V = v + "[aeiou]*";      // vowel sequence
-
-var mgr0 = "^(" + C + ")?" + V + C;               // [C]VC... is m>0
-var meq1 = "^(" + C + ")?" + V + C + "(" + V + ")?$";  // [C]VC[V] is m=1
-var mgr1 = "^(" + C + ")?" + V + C + V + C;       // [C]VCVC... is m>1
-var s_v = "^(" + C + ")?" + v;                   // vowel in stem
-
-function stemmer(w) {
-var stem;
-var suffix;
-var firstch;
-var re;
-var re2;
-var re3;
-var re4;
-var origword = w;
-
-if (w.length < 3) { return w; }
-
-firstch = w.substr(0,1);
-if (firstch == "y") {
-  w = firstch.toUpperCase() + w.substr(1);
-}
-
-// Step 1a
-re = /^(.+?)(ss|i)es$/;
-re2 = /^(.+?)([^s])s$/;
-
-if (re.test(w)) { w = w.replace(re,"$1$2"); }
-else if (re2.test(w)) {  w = w.replace(re2,"$1$2"); }
-
-// Step 1b
-re = /^(.+?)eed$/;
-re2 = /^(.+?)(ed|ing)$/;
-if (re.test(w)) {
-  var fp = re.exec(w);
-  re = new RegExp(mgr0);
-  if (re.test(fp[1])) {
-    re = /.$/;
-    w = w.replace(re,"");
-  }
-} else if (re2.test(w)) {
-  var fp = re2.exec(w);
-  stem = fp[1];
-  re2 = new RegExp(s_v);
-  if (re2.test(stem)) {
-    w = stem;
-    re2 = /(at|bl|iz)$/;
-    re3 = new RegExp("([^aeiouylsz])\\1$");
-    re4 = new RegExp("^" + C + v + "[^aeiouwxy]$");
-    if (re2.test(w)) { w = w + "e"; }
-    else if (re3.test(w)) { re = /.$/; w = w.replace(re,""); }
-    else if (re4.test(w)) { w = w + "e"; }
-  }
-}
-
-// Step 1c
-re = /^(.+?)y$/;
-if (re.test(w)) {
-  var fp = re.exec(w);
-  stem = fp[1];
-  re = new RegExp(s_v);
-  if (re.test(stem)) { w = stem + "i"; }
-}
-
-// Step 2
-re = /^(.+?)(ational|tional|enci|anci|izer|bli|alli|entli|eli|ousli|ization|ation|ator|alism|iveness|fulness|ousness|aliti|iviti|biliti|logi)$/;
-if (re.test(w)) {
-  var fp = re.exec(w);
-  stem = fp[1];
-  suffix = fp[2];
-  re = new RegExp(mgr0);
-  if (re.test(stem)) {
-    w = stem + step2list[suffix];
-  }
-}
-
-// Step 3
-re = /^(.+?)(icate|ative|alize|iciti|ical|ful|ness)$/;
-if (re.test(w)) {
-  var fp = re.exec(w);
-  stem = fp[1];
-  suffix = fp[2];
-  re = new RegExp(mgr0);
-  if (re.test(stem)) {
-    w = stem + step3list[suffix];
-  }
-}
-
-// Step 4
-re = /^(.+?)(al|ance|ence|er|ic|able|ible|ant|ement|ment|ent|ou|ism|ate|iti|ous|ive|ize)$/;
-re2 = /^(.+?)(s|t)(ion)$/;
-if (re.test(w)) {
-  var fp = re.exec(w);
-  stem = fp[1];
-  re = new RegExp(mgr1);
-  if (re.test(stem)) {
-    w = stem;
-  }
-} else if (re2.test(w)) {
-  var fp = re2.exec(w);
-  stem = fp[1] + fp[2];
-  re2 = new RegExp(mgr1);
-  if (re2.test(stem)) {
-    w = stem;
-  }
-}
-
-// Step 5
-re = /^(.+?)e$/;
-if (re.test(w)) {
-  var fp = re.exec(w);
-  stem = fp[1];
-  re = new RegExp(mgr1);
-  re2 = new RegExp(meq1);
-  re3 = new RegExp("^" + C + v + "[^aeiouwxy]$");
-  if (re.test(stem) || (re2.test(stem) && !(re3.test(stem)))) {
-    w = stem;
-  }
-}
-
-re = /ll$/;
-re2 = new RegExp(mgr1);
-if (re.test(w) && re2.test(w)) {
-  re = /.$/;
-  w = w.replace(re,"");
-}
-
-// and turn initial Y back to y
-
-if (firstch == "y") {
-  w = firstch.toLowerCase() + w.substr(1);
-}
-
-return w;
-}
-
-// memoize at the module level
-var memo = {};
-var memoizingStemmer = function(w) {
-if (!memo[w]) {
-  memo[w] = stemmer(w);
-}
-return memo[w];
-}
-
-if (typeof exports != 'undefined' && exports != null) {
-exports.stemmer = stemmer;
-exports.memoizingStemmer = memoizingStemmer;
-}
-
 /* Stems a whole body of text, not just one word like stemmer() does. */
 function stemText(text) {
   var stemmedText = "";
@@ -208,3 +7,167 @@ function stemText(text) {
   }   
   return stemmedText;
 }
+
+// Stemmer from: https://github.com/cwolves/stem/blob/master/en.js
+// implemented from algorithm at http://snowball.tartarus.org/algorithms/english/stemmer.html
+var exceptions = {
+  skis    : 'ski'   ,
+  skies   : 'sky'   ,
+  dying   : 'die'   ,
+  lying   : 'lie'   ,
+  tying   : 'tie'   ,
+  idly    : 'idl'   ,
+  gently  : 'gentl' ,
+  ugly    : 'ugli'  ,
+  early   : 'earli' ,
+  only    : 'onli'  ,
+  singly  : 'singl' ,
+  sky     : 'sky'   ,
+  news    : 'news'  ,
+  howe    : 'howe'  ,
+  atlas   : 'atlas' ,
+  cosmos  : 'cosmos',
+  bias    : 'bias'  ,
+  andes   : 'andes'
+
+}, exceptions1a = {
+  inning  : 'inning' ,
+  outing  : 'outing' , 
+  canning : 'canning',
+  herring : 'herring',
+  earring : 'earring',
+  proceed : 'proceed',
+  exceed  : 'exceed' ,
+  succeed : 'succeed'
+
+}, extensions2 = {
+  ization : 'ize' , 
+  fulness : 'ful' , 
+  iveness : 'ive' , 
+  ational : 'ate' , 
+  ousness : 'ous' ,  
+  tional  : 'tion', 
+  biliti  : 'ble' , 
+  lessli  : 'less', 
+  entli   : 'ent' , 
+  ation   : 'ate' , 
+  alism   : 'al'  , 
+  aliti   : 'al'  , 
+  ousli   : 'ous' , 
+  iviti   : 'ive' , 
+  fulli   : 'ful' , 
+  enci    : 'ence', 
+  anci    : 'ance', 
+  abli    : 'able', 
+  izer    : 'ize' , 
+  ator    : 'ate' , 
+  alli    : 'al'  , 
+  bli     : 'ble' , 
+  ogi     : 'og'  , 
+  li      : ''
+};
+
+function stemmer(word) {
+  if(word.length < 3){ return word; }
+  if(exceptions[word]){ return exceptions[word]; }
+
+  var eRx = ['', ''],
+     word = word.toLowerCase().replace(/^'/, '').replace(/[^a-z']/g, '').replace(/^y|([aeiouy])y/g, '$1Y'),
+            R1, res;
+
+  if(res = /^(gener|commun|arsen)/.exec(word)){
+    R1 = res[0].length;
+  }else{
+    R1 = ((/[aeiouy][^aeiouy]/.exec(' '+word) || eRx).index || 1000) + 1;
+  }
+
+  var R2 = (((/[aeiouy][^aeiouy]/.exec(' '+word.substr(R1)) || eRx).index || 1000)) + R1 + 1;
+
+
+  // step 0
+  word = word.replace(/('s'?|')$/, '');
+
+
+  // step 1a
+  rx = /(?:(ss)es|(..i)(?:ed|es)|(us)|(ss)|(.ie)(?:d|s))$/;
+  if(rx.test(word)){
+    word = word.replace(rx, '$1$2$3$4$5');
+  }else{
+    word = word.replace(/([aeiouy].+)s$/, '$1');
+  }
+
+  if(exceptions1a[word]){ return exceptions1a[word]; }
+
+  // step 1b
+  var s1 = (/(eedly|eed)$/.exec(word) || eRx)[1],
+      s2 = (/(?:[aeiouy].*)(ingly|edly|ing|ed)$/.exec(word) || eRx)[1];
+
+  if(s1.length > s2.length){
+    if(word.indexOf(s1, R1)>=0){
+      word = word.substr(0, word.length - s1.length) + 'ee';
+    }
+  }else if(s2.length > s1.length){
+    word = word.substr(0, word.length - s2.length);
+    if(/(at|bl|iz)$/.test(word)){
+      word += 'e';
+    }else if(/(bb|dd|ff|gg|mm|nn|pp|rr|tt)$/.test(word)){
+      word = word.substr(0, word.length - 1);
+    }else if(!word.substr(R1) && /([^aeiouy][aeiouy][^aeiouywxY]|^[aeiouy][^aeiouy]|^[aeiouy])$/.test(word)){
+      word += 'e';
+    }
+  }
+
+
+  // step 1c
+  word = word.replace(/(.[^aeiouy])[yY]$/, '$1i');
+
+
+  // step 2
+  var sfx = /(ization|fulness|iveness|ational|ousness|tional|biliti|lessli|entli|ation|alism|aliti|ousli|iviti|fulli|enci|anci|abli|izer|ator|alli|bli|l(ogi)|[cdeghkmnrt](li))$/.exec(word);
+  if(sfx){
+    sfx  = sfx[3] || sfx[2] || sfx[1];
+    if(word.indexOf(sfx, R1) >= 0){
+      word = word.substr(0, word.length - sfx.length) + extensions2[sfx];
+    }
+  }
+
+
+  // step 3
+  var sfx = (/(ational|tional|alize|icate|iciti|ative|ical|ness|ful)$/.exec(word) || eRx)[1];
+  if(sfx && (word.indexOf(sfx, R1) >= 0)){
+    word = word.substr(0, word.length - sfx.length) + {
+      ational : 'ate',
+      tional  : 'tion',
+      alize   : 'al',
+      icate   : 'ic',
+      iciti   : 'ic',
+      ative   : ((word.indexOf('ative', R2) >= 0) ? '' : 'ative'),
+      ical    : 'ic',
+      ness    : '',
+      ful     : ''
+    }[sfx];
+  }
+
+
+  // step 4
+  var sfx = /(ement|ance|ence|able|ible|ment|ant|ent|ism|ate|iti|ous|ive|ize|[st](ion)|al|er|ic)$/.exec(word);
+  if(sfx){
+    sfx = sfx[2] || sfx[1];
+    if(word.indexOf(sfx, R2) >= 0){
+      word = word.substr(0, word.length - sfx.length);
+    }
+  }
+
+
+  // step 5
+  if(word.substr(-1) == 'e'){
+    if(word.substr(R2) || (word.substr(R1) && !(/([^aeiouy][aeiouy][^aeiouywxY]|^[aeiouy][^aeiouy])e$/.test(word)))){
+      word = word.substr(0, word.length - 1);
+    }
+
+  }else if((word.substr(-2) == 'll') && (word.indexOf('l', R2) >= 0)){
+    word = word.substr(0, word.length - 1);
+  }
+
+  return word.toLowerCase();
+};

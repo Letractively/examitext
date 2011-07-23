@@ -11,24 +11,13 @@ function getWords(text) {
 	for (var i in words) {
 		words[i] = words[i].replace(/[^a-zA-Z0-9 -]+/g, '');
 	}
-	// Makes sure to rmeove any empty strings from the array
-	var index = words.indexOf('');
-	while (index != -1) {
-		words.splice(index, 1);
-		index = words.indexOf('');
+	// Makes sure to remove any 0, 1 or 2 letters words from the array
+	for (var i = 0; (i < words.length); ++i) {
+		if (words[i].length < 3) {
+			words.splice(i, 1)
+			i -= 1;
+		}
 	}
-
-	// Removes the whitespace entries from the array
-	var index = words.indexOf(' ');
-	if (index >= 0) words.splice(index, 1);
-	index = words.indexOf('\n');
-	if (index >= 0) words.splice(index, 1);
-	index = words.indexOf('\r');
-	if (index >= 0) words.splice(index, 1);
-	index = words.indexOf('\t');
-	if (index >= 0) words.splice(index, 1);
-	index = words.indexOf('');
-	if (index >= 0) words.splice(index, 1);
 
 	return words;
 }
@@ -63,13 +52,6 @@ function getWordFrequencies(messages) {
 		}
 	}
 
-	for (var name in participants) {
-		for (var word in participants[name]) {
-			if (isNaN(participants[name][word]))
-				alert(word + " - " + participants[name][word])
-		}
-	}
-
 	return participants;
 }
 
@@ -80,7 +62,6 @@ function getTotalWordCount(wordFrequencies) {
 	for (var i in wordFrequencies) {
 		total += wordFrequencies[i];
 	}
-	alert(total)
 	return total;
 }
 

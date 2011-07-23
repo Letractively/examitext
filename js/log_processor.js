@@ -2,7 +2,7 @@
 
 function processMessage(text) {
 	var message = splitNameAndMessage(text);
-	message.content = applyStoplist(stemText(message.content));
+	message.content = applyStoplistToString(stemText(message.content));
 	return message;
 }
 
