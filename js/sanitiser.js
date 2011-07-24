@@ -30,12 +30,16 @@ function Sanitiser(language) {
 Sanitiser.prototype.sanitise = function(word) {
 	var sanitisedWord = word.replace(this.regex, '');
 	sanitisedWord = sanitisedWord.toLowerCase();
-	
+
 	// Makes sure to return an empty string if the word is less than 3
 	// characters long. This tells the stemmer to just completely
 	// ignore the word.
 	if (sanitisedWord.length < 3) {
 		return "";
+	// NOTE: Also makes sure constructor is ignored	so it doesn't cause
+	// any problems with JavaScript trying to assign an array a constructor.
+	} else if (sanitisedWord == "constructor") {
+		return "_constructor";
 	} else {
 		return sanitisedWord;
 	}

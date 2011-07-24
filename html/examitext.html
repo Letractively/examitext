@@ -17,6 +17,7 @@
 	<script type="text/javascript" src="../js/highcharts_wrapper.js"></script>
 
 	<script type="text/javascript" src="../js/util.js"></script>
+	<script type="text/javascript" src="../js/taskqueue.js"></script>
 	<script type="text/javascript" src="../js/sanitiser.js"></script>
 	<script type="text/javascript" src="../js/stemmer.js"></script>
 	<script type="text/javascript" src="../js/stoplist.js"></script>
@@ -37,7 +38,6 @@
 		this.center_y();
 	    return this;
 	}
-
 
 	// Maps the index of the selected language to its name
 	var indexToLanguage = {
@@ -61,90 +61,108 @@
 		return rawText.value;
 	}
 
+	/*  Draws the calculated chat log stats. */
+	function displayStats(stats) {
+		showMessage("Generating display...");
+
+		// Now interpret them and show them
+		var statTable =  "<table><th>Participant</th>" +
+		"<th>Percent of Messages</th><th>Number of Messages</th><th>Average Message " +
+		"Length</th><th>Average Message Density</th><th>Word Count</th>";
+		var pieChartData = [ ];
+
+		for (var name in stats.participants) {
+			var participant = stats.participants[name];
+
+			statTable += "<tr><td>" + name + "</td><td>" + roundNumber(participant.percentOfMessages, 2) +
+				"%</td><td>" + participant.getMessageCount() + "</td><td>" + roundNumber(participant.getAverageMessageLength(), 2) +
+				"</td><td>" + roundNumber(participant.getAverageMessageDensity(), 2) + "</td><td>" + participant.getWordCount() + "</tr>";
+			pieChartData.push([name, participant.percentOfMessages]);
+		}
+
+		statTable += "</table>";
+
+		// Generates tables to show the top 10 words for each participant
+		var topWordTables = [];
+		for (var name in stats.participants) {
+			var current = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" + name +
+				"'s Top 10 Words</span></th></tr><tr><th>Word</th><th>Frequency</th><th>Relative Frequency</th></tr>";
+
+			var topWords = stats.participants[name].getMostSaidWords(10);
+			for (var i in topWords) {
+				if (i >= 0 && i <= 2) { // large size fonts for top 3
+					current += "<tr><td><span class='top" + i + "'>" + topWords[i][0] +
+						"</span></td><td><span class='top" + i + "'>" + topWords[i][1] + "</span></td>" +
+						"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
+				} else {
+					current += "<tr><td>" + topWords[i][0] + "</td><td>" + topWords[i][1] + "</td>" +
+						"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
+				}
+			}
+			current += "</table>";
+
+			topWordTables.push(current);
+		}
+		var tableOfTables = "<table width='650px'>";
+		for (var i in topWordTables) {
+			if (i % 2 == 0) {
+				tableOfTables += "<tr><td>" + topWordTables[i] + "</td>";
+			} else {
+				tableOfTables += "<td>" + topWordTables[i] + "</td></tr>";
+			}
+		}
+
+		// Create tables/graphs from the results
+		$("#tableContainer").html(statTable);
+		$("#wordsContainer").html(tableOfTables);
+		createPieChart("pieChartContainer", "Message Contribution", pieChartData);
+		$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
+
+		$("#messageContainer").hide();
+		$("#formContainer").hide("fast");
+		$("#resultsContainer").hide();
+		$("#resultsContainer").show("fast");
+	}
+
+	function showMessage(message, showTime) { // NOTE: showTime is optional parameter
+		$("#messageContainer").html("<p class='textCenter red'><strong>" + message + "</strong></p>");
+		if (!$("#messageContainer").is(":visible")) {
+			$("#messageContainer").hide();
+			$("#messageContainer").show("slow");
+		}
+	
+		// If a show time was given, wait for the given time then hide the message
+		if (showTime) {
+			$("#messageContainer").delay(showTime).hide("slow");
+		}
+	}
+
 	/* Called when the analyse button is clicked. */
 	function analyse() {
 		// Get source text
 		var text = getText();
 
 		if (text != undefined && text != "") {
-			// Creates objects to clean up the text based on the selected language
-			var language = indexToLanguage[selectedLanguage];
-			var sanitiser = new Sanitiser(language);
-			var stemmerObject = new Stemmer(sanitiser, language);
-			var stoplist = new Stoplist(STOP_LISTS[language]);
-			// Detect messages and calculate statistics
-			var messages = processLog(text, stemmerObject, stoplist);
-			var stats = new ChatStatistics(messages);
+			if (!TaskQueue.instance.running) {
+				// Creates objects to clean up the text based on the selected language
+				var language = indexToLanguage[selectedLanguage];
+				var sanitiser = new Sanitiser(language);
+				var stemmerObject = new Stemmer(sanitiser, language);
+				var stoplist = new Stoplist(STOP_LISTS[language]);
 
-			// Now interpret them and show them
-			var statTable =  "<table><th>Participant</th>" +
-			"<th>Percent of Messages</th><th>Number of Messages</th><th>Average Message " +
-			"Length</th><th>Average Message Density</th><th>Word Count</th>";
-			var pieChartData = [ ];
-
-			for (var name in stats.participants) {
-				var participant = stats.participants[name];
-
-				statTable += "<tr><td>" + name + "</td><td>" + roundNumber(participant.percentOfMessages, 2) +
-					"%</td><td>" + participant.getMessageCount() + "</td><td>" + roundNumber(participant.getAverageMessageLength(), 2) +
-					"</td><td>" + roundNumber(participant.getAverageMessageDensity(), 2) + "</td><td>" + participant.getWordCount() + "</tr>";
-				pieChartData.push([name, participant.percentOfMessages]);
+				TaskQueue.instance.add(new LogProcessor(text, stemmerObject, stoplist, showMessage));
+				TaskQueue.instance.add(new ChatStatistics(showMessage));
+				TaskQueue.instance.add(new FunctionWrapper(displayStats));
+				TaskQueue.instance.start();
 			}
-
-			statTable += "</table>";
-
-			// Generates tables to show the top 10 words for each participant
-			var topWordTables = [];
-			for (var name in stats.participants) {
-				var current = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" + name +
-					"'s Top 10 Words</span></th></tr><tr><th>Word</th><th>Frequency</th><th>Relative Frequency</th></tr>";
-
-				var topWords = stats.participants[name].getMostSaidWords(10);
-				for (var i in topWords) {
-					if (i >= 0 && i <= 2) { // large size fonts for top 3
-						current += "<tr><td><span class='top" + i + "'>" + topWords[i][0] +
-							"</span></td><td><span class='top" + i + "'>" + topWords[i][1] + "</span></td>" +
-							"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
-					} else {
-						current += "<tr><td>" + topWords[i][0] + "</td><td>" + topWords[i][1] + "</td>" +
-							"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
-					}
-				}
-				current += "</table>";
-
-				topWordTables.push(current);
-			}
-			var tableOfTables = "<table width='650px'>";
-			for (var i in topWordTables) {
-				if (i % 2 == 0) {
-					tableOfTables += "<tr><td>" + topWordTables[i] + "</td>";
-				} else {
-					tableOfTables += "<td>" + topWordTables[i] + "</td></tr>";
-				}
-			}
-
-	
-			// Create tables/graphs from the results
-			$("#tableContainer").html(statTable);
-			$("#wordsContainer").html(tableOfTables);
-			createPieChart("pieChartContainer", "Message Contribution", pieChartData);
-			$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
-
-			$("#messageContainer").hide();
-			$("#formContainer").hide("fast");
-			$("#resultsContainer").hide();
-			$("#resultsContainer").show("fast");
-
-
 		} else {
-			$("#messageContainer").hide();
-			$("#messageContainer").html("<p class='textCenter red'><strong>No text provided.</strong></p>");
-			$("#messageContainer").show("slow").delay(3500).hide("slow");
+			showMessage("No text provided.", 4000);
 		}
 	}
 
 	function returnToUploader() {
 		$("#buttonContainer").html("<a href='javascript:analyse()'' class='button'>Analyse</a><br /><br />");
+		$("#messageContainer").hide();
 		$("#resultsContainer").hide("fast");
 		$("#formContainer").show("fast");
 	}
@@ -180,6 +198,7 @@
 		selectedProgLanguage = index;
 		$("#progLanguageID" + selectedProgLanguage).addClass("selected");
 	}
+
 	</script>
 
 	<link rel="stylesheet" type="text/css" href="../css/reset.css" />
@@ -284,6 +303,7 @@
 	     its content by this point. -->
 	<script type="text/javascript">
 		$("#container").center();
+		$("#messageContainer").hide();
 		$("#resultsContainer").hide();
 		$("#options1").hide();
 	</script>

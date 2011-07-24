@@ -172,59 +172,70 @@ Message.nameSearchers = [
 
 /* End of class Message */
 
+
 /* Start of class ChatStatistics */
-function ChatStatistics(messages) {
+
+function ChatStatistics(sendMessage) {
 	this.participants = {};
-	this.totalMessages = messages.length;
+	this.totalMessages = 0;
+	this.sendMessage = sendMessage; // used to send messages to web page
+}
 
-	for (var i in messages) {
-		if (!(messages[i].name in this.participants)) {
-			this.participants[messages[i].name] = new Participant(messages[i].name);
+ChatStatistics.prototype.run = function(messages) { // TaskQueue function
+	for (var count = 0; (count < 25); ++count) {
+		var message = messages[this.totalMessages];
+		if (!(message.name in this.participants)) {
+			this.participants[message.name] = new Participant(message.name);
 		}
-		this.participants[messages[i].name].addMessage(messages[i].content);
-	}
+		this.participants[message.name].addMessage(message.content);
 
-	// Calculates each participant's message density separately.
-	if (messages.length >= 0) {
-		densities = {};
+		this.totalMessages += 1;
+		if (this.totalMessages >= messages.length) {
+			// Calculates each participant's message density separately.
+			if (messages.length >= 0) {
+				densities = {};
 
-		var currentName = messages[0].name;
-		var currentCount = 1;
-		for (var i = 1; (i < messages.length); ++i) {
-			var message = messages[i];
-			if (currentName != message.name) {
-				if (currentName in densities) {
-					densities[currentName].sum += currentCount;
-					densities[currentName].amount += 1;
-				} else {
-					densities[currentName] = {};
-					densities[currentName].sum = currentCount;
-					densities[currentName].amount = 1;
+				var currentName = messages[0].name;
+				var currentCount = 1;
+				for (var i = 1; (i < messages.length); ++i) {
+					var message = messages[i];
+					if (currentName != message.name) {
+						if (currentName in densities) {
+							densities[currentName].sum += currentCount;
+							densities[currentName].amount += 1;
+						} else {
+							densities[currentName] = {};
+							densities[currentName].sum = currentCount;
+							densities[currentName].amount = 1;
+						}
+						currentName = message.name;
+						currentCount = 0;
+					}
+					currentCount += 1;
 				}
-				currentName = message.name;
-				currentCount = 0;
+
+				for (var name in densities) {
+					this.participants[name].averageMessageDensity =
+						(densities[name].sum / densities[name].amount);
+				}
 			}
-			currentCount += 1;
+
+			// Calculates percentage of messages each participant contributed
+			for (var name in this.participants) {
+				this.participants[name].percentOfMessages =
+					(this.participants[name].getMessageCount() / this.totalMessages) * 100;	
+			}
+
+			// Finally, renames blank entries into Anonymous
+			if ("" in this.participants) {
+				this.participants["Anonymous"] = this.participants[""];
+				delete this.participants[""];
+			}
+
+			return this;
 		}
-
-		for (var name in densities) {
-			this.participants[name].averageMessageDensity =
-				(densities[name].sum / densities[name].amount);
-		}
 	}
-
-	// Calculates percentage of messages each participant contributed
-	for (var name in this.participants) {
-		this.participants[name].percentOfMessages =
-			(this.participants[name].getMessageCount() / this.totalMessages) * 100;	
-	}
-
-	// Finally, renames blank entries into Anonymous
-	if ("" in this.participants) {
-		this.participants["Anonymous"] = this.participants[""];
-		delete this.participants[""];
-	}
-
+	this.sendMessage("Processed " + this.totalMessages + " out of " + messages.length + " messages.");
 }
 
 ChatStatistics.prototype.getTotalWordCount = function() {
@@ -245,6 +256,34 @@ ChatStatistics.prototype.getMessagePercentages = function() {
 }
 
 /* End of class ChatStatistics */
+
+/* Start of class LogProcessor
+ * Wrapped in a class and not just a function since it needs to
+ * added the task queue for asynchronous processing. */
+function LogProcessor(logText, stemmer, stoplist, sendMessage) { // TaskQueue function
+	this.lines = logText.split("\n");
+	this.messages = [];
+	this.currentIndex = 0;
+
+	this.stemmer = stemmer;
+	this.stoplist = stoplist;
+	this.sendMessage = sendMessage
+}
+
+LogProcessor.prototype.run = function(value) {
+	for (var count = 0; (count < 25); ++count) {
+		this.messages.push(new Message(
+			this.lines[this.currentIndex], this.stemmer, this.stoplist));
+
+		this.currentIndex += 1;
+		if (this.currentIndex >= this.lines.length) {
+			return this.messages;
+		}
+	}
+	this.sendMessage("Read " + this.currentIndex + " out of " + this.lines.length + " messages.");
+}
+
+/* End of class LogProcessor */
 
 /* Start of utility functions. */
 
@@ -270,17 +309,3 @@ function toSortedTuples(obj) {
 }
 
 /* End of utility functions. */
-
-/* MAIN FUNCTION */
-function processLog(logText, stemmer, stoplist) {
-	var lines = logText.split("\n");
-	var messages = [];
-
-	for (var i in lines) {
-		messages.push(new Message(lines[i], stemmer, stoplist));
-	}
-
-	return messages;
-}
-
-/* END OF MAIN FUNCTION */
