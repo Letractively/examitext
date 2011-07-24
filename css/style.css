@@ -66,15 +66,17 @@ textarea { resize: none; width:100%; }
 .top1 { font-size: 16px; font-weight: bold; }
 .top2 { font-size: 14px; font-weight: bold; }
 
-.featurePadding { float: left; width: 130px; min-height: 140px; height: 140px; max-height: 140px; background-color: #DDD; }
 .feature { float: left; width: 180px; min-height: 140px; height: 140px; max-height: 140px; background-color: #DDD; }
 .feature:hover, .feature:active, .selected { background-color: #AAA; }
 .feature img { text-align: center; display: block; margin: 0 auto; }
 
-.flagPadding { float: left; width: 80px; min-height: 60px; height: 60px; max-height: 60px; background-color: #DDD; margin: 20px 0; }
 .language { display: block; float: left; width: 80px; min-height: 60px; height: 60px; max-height: 60px; background-color: #DDD; margin: 20px 0; }
 .language:hover, .language:active, .selected { background-color: #AAA; }
 .language img { text-align: center; display: block; margin: 0 auto; padding-bottom: 10px; }
+
+.featurePadding { float: left; width: 130px; min-height: 140px; height: 140px; max-height: 140px; background-color: #DDD; }
+.flagPadding { float: left; width: 80px; min-height: 60px; height: 60px; max-height: 60px; background-color: #DDD; margin: 20px 0; }
+.progLanguagePadding { float: left; width: 200px; min-height: 60px; height: 60px; max-height: 60px; background-color: #DDD; margin: 20px 0; }
 
 
 /* Upload related classes. */

@@ -20,6 +20,7 @@
 	<script type="text/javascript" src="../js/stoplist.js"></script>
 	<script type="text/javascript" src="../js/log_processor.js"></script>
 	<script type="text/javascript">
+
 	/* Useful for dynamically placing elements at the centre of the screen. */
 	jQuery.fn.center_x = function() {
 		this.css("position","absolute");
@@ -34,6 +35,11 @@
 		this.center_y();
 	    return this;
 	}
+
+	// Global variables for this page, store what feature and language have been selected
+	var selectedFeature = 0
+	var selectedLanguage = 0;
+	var selectedProgLanguage = 0;
 
 	/* Retrives text from the raw text area. */
 	function getText() {
@@ -125,6 +131,39 @@
 		$("#resultsContainer").hide("fast");
 		$("#formContainer").show("fast");
 	}
+
+	function setFeature(index) {
+		previousFeature = selectedFeature;
+		selectedFeature = index;
+		$("#featureID" + previousFeature).removeClass("selected");
+		$("#featureID" + selectedFeature).addClass("selected");
+
+		// Now shows the appropriate form
+		if (selectedFeature == 0 || selectedFeature == 1) {
+			if (previousFeature != 0 && previousFeature != 1) {
+				$("#options1").hide("fast");
+				$("#options0").show("fast");
+			}
+		} else if (selectedFeature == 2) {
+			if (previousFeature != 2) {
+				$("#options0").hide("fast");
+				$("#options1").show("fast");
+			}
+		}
+	}
+
+	function setLanguage(index) {
+		$("#languageID" + selectedLanguage).removeClass("selected");
+		selectedLanguage = index;
+		$("#languageID" + selectedLanguage).addClass("selected");
+		
+	}
+
+	function setProgLanguage(index) {
+		$("#progLanguageID" + selectedProgLanguage).removeClass("selected");
+		selectedProgLanguage = index;
+		$("#progLanguageID" + selectedProgLanguage).addClass("selected");
+	}
 	</script>
 
 	<link rel="stylesheet" type="text/css" href="../css/reset.css" />
@@ -142,9 +181,12 @@
 		<div id="content">
 			<div id="formContainer">
 				<div class="featurePadding"></div>
-				<a class="feature selected"><img src="../images/text_file.png" alt="Text Document" /></a>
-				<a class="feature"><img src="../images/chat_log.png" alt="Chat Log" /></a>
-				<a class="feature"><img src="../images/source_file.png" alt="Source File" /></a>
+				<a id="featureID0" class="feature selected" href="javascript:setFeature(0)">
+				<img src="../images/text_file.png" alt="Text Document" /></a>
+				<a id="featureID1" class="feature" href="javascript:setFeature(1)">
+				<img src="../images/chat_log.png" alt="Chat Log" /></a>
+				<a id="featureID2" class="feature" href="javascript:setFeature(2)">
+				<img src="../images/source_file.png" alt="Source File" /></a>
 				<div class="featurePadding"></div>
 
 				<form name="logForm" action="#">
@@ -160,26 +202,43 @@
 					</table>
 				</form>
 
-				<div class="flagPadding"></div>
-				<a class="language selected" href="javascript:setlanguage(0)" title="English">
-				<img src="../images/flags/uk.png" alt="English" /></a>
-				<a class="language" href="javascript:setlanguage(1)" title="Fran&#231;ais">
-				<img src="../images/flags/fr.png" alt="Fran&#231;ais" /></a>
-				<a class="language" href="javascript:setlanguage(2)" title="Deutsch">
-				<img src="../images/flags/de.png" alt="Deutsch" /></a>
-				<a class="language" href="javascript:setlanguage(3)" title="Espa&#241;ol">
-				<img src="../images/flags/es.png" alt="Svenska" /></a>
-				<a class="language" href="javascript:setlanguage(4)" title="Portugu&#234;s">
-				<img src="../images/flags/pt.png" alt="Svenska" /></a>
-				<a class="language" href="javascript:setlanguage(5)" title="Svenska">
-				<img src="../images/flags/se.png" alt="Svenska" /></a>
-				<a class="language" href="javascript:setlanguage(6)" title="Suomi">
-				<img src="../images/flags/fi.png" alt="Suomi" /></a>
-				<a class="language" href="javascript:setlanguage(7)" title="&#1088;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;">
-				<img src="../images/flags/ru.png" alt="&#1088;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;" /></a>
-				<div class="flagPadding"></div>
+				<div id="options0">
+					<div class="flagPadding"></div>
+					<a id="languageID0" class="language selected" href="javascript:setLanguage(0)" title="English">
+					<img src="../images/flags/uk.png" alt="English" /></a>
+					<a id="languageID1" class="language" href="javascript:setLanguage(1)" title="Fran&#231;ais">
+					<img src="../images/flags/fr.png" alt="Fran&#231;ais" /></a>
+					<a id="languageID2" class="language" href="javascript:setLanguage(2)" title="Deutsch">
+					<img src="../images/flags/de.png" alt="Deutsch" /></a>
+					<a id="languageID3" class="language" href="javascript:setLanguage(3)" title="Espa&#241;ol">
+					<img src="../images/flags/es.png" alt="Espa&#241;ol" /></a>
+					<a id="languageID4" class="language" href="javascript:setLanguage(4)" title="Portugu&#234;s">
+					<img src="../images/flags/pt.png" alt="Portugu&#234;s" /></a>
+					<a id="languageID5" class="language" href="javascript:setLanguage(5)" title="Svenska">
+					<img src="../images/flags/se.png" alt="Svenska" /></a>
+					<a id="languageID6" class="language" href="javascript:setLanguage(6)" title="Suomi">
+					<img src="../images/flags/fi.png" alt="Suomi" /></a>
+					<a id="languageID7" class="language" href="javascript:setLanguage(7)" title="&#1088;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;">
+					<img src="../images/flags/ru.png" alt="&#1088;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;" /></a>
+					<div class="flagPadding"></div>
+				</div>
+				<div id="options1">
+					<div class="progLanguagePadding"></div>
+					<a id="progLanguageID0" class="language" href="javascript:setProgLanguage(0)" title="HTML">
+					<img src="../images/proglanguages/html.png" alt="HTML" /></a>
+					<a id="progLanguageID1" class="language" href="javascript:setProgLanguage(1)" title="JavaScript">
+					<img src="../images/proglanguages/js.png" alt="JavaScript" /></a>
+					<a id="progLanguageID2" class="language" href="javascript:setProgLanguage(2)" title="Java">
+					<img src="../images/proglanguages/java.png" alt="Java" /></a>
+					<a id="progLanguageID3" class="language" href="javascript:setProgLanguage(3)" title="C#">
+					<img src="../images/proglanguages/cs.png" alt="C#" /></a>
+					<a id="progLanguageID4" class="language" href="javascript:setProgLanguage(4)" title="C++">
+					<img src="../images/proglanguages/cpp.png" alt="C++" /></a>
+					<div class="progLanguagePadding"></div>
+				</div>
 
 				<!-- Contains messages (typically error messages) to show to the user. -->
+				<br />
 				<div id="messageContainer"></div>
 				<br />
 				<br />
@@ -210,6 +269,7 @@
 	<script type="text/javascript">
 		$("#container").center();
 		$("#resultsContainer").hide();
+		$("#options1").hide();
 	</script>
 
 </body>
