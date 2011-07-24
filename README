@@ -30,13 +30,17 @@ Licensing
 
 Please read the file called LICENSE for the details on Chat Analyser's license.
 
-JQuery is used under the MIT License.
+JQuery is licensed under the MIT License.
 
-Highcharts is used under the Creative Commons Attribution-NonCommercial 3.0
+Highcharts is licensed under the Creative Commons Attribution-NonCommercial 3.0
 License.
 
-CSS3 PIE is used under the terms of the Apache License Version 2.0, which can
-be read here: https://github.com/lojjic/PIE/blob/master/LICENSE-APACHE2.txt
+CSS3 PIE is licensed under the terms of the Apache License Version 2.0, which
+can be read here:
+https://github.com/lojjic/PIE/blob/master/LICENSE-APACHE2.txt
+
+jsSnowball is licensed under the Mozilla Public License. Details available
+here: http://www.mozilla.org/MPL/
 
 Authors and Contacts
 --------

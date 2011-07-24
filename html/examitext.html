@@ -11,6 +11,7 @@
 	<!-- External libraries -->
 	<script type="text/javascript" src="../js/jquery-1.6.2.js"></script>
 	<script type="text/javascript" src="../js/highcharts.js"></script>
+	<script type="text/javascript" src="../js/snowball.js"></script>
 	<script type="text/javascript" src="../js/split.js"></script>
 
 	<script type="text/javascript" src="../js/highcharts_wrapper.js"></script>
@@ -48,6 +49,17 @@
 		return rawText.value;
 	}
 
+	var indexToLanguage = {
+		0 : "english",
+		1 : "french",
+		2 : "german",
+		3 : "italian",
+		4 : "spanish",
+		5 : "portuguese",
+		6 : "swedish",
+		7 : "finnish"
+	}
+
 	/* Called when the analyse button is clicked. */
 	function analyse() {
 		// Get source text
@@ -55,7 +67,7 @@
 
 		if (text != undefined && text != "") {
 			// Calclate statistics
-			var stemmerObject = new Stemmer(SANITISERS[selectedLanguage], STEMMERS[selectedLanguage]);
+			var stemmerObject = new Stemmer(SANITISERS[selectedLanguage], indexToLanguage[selectedLanguage]);
 			var stoplist = new Stoplist(STOP_LISTS[selectedLanguage]);	
 			var messages = processLog(text, stemmerObject, stoplist);
 			var stats = new ChatStatistics(messages);
@@ -157,7 +169,6 @@
 		$("#languageID" + selectedLanguage).removeClass("selected");
 		selectedLanguage = index;
 		$("#languageID" + selectedLanguage).addClass("selected");
-		
 	}
 
 	function setProgLanguage(index) {
@@ -211,16 +222,16 @@
 					<img src="../images/flags/fr.png" alt="Fran&#231;ais" /></a>
 					<a id="languageID2" class="language" href="javascript:setLanguage(2)" title="Deutsch">
 					<img src="../images/flags/de.png" alt="Deutsch" /></a>
-					<a id="languageID3" class="language" href="javascript:setLanguage(3)" title="Espa&#241;ol">
+					<a id="languageID3" class="language" href="javascript:setLanguage(3)" title="Italiano">
+					<img src="../images/flags/it.png" alt="Italiano" /></a>
+					<a id="languageID4" class="language" href="javascript:setLanguage(4)" title="Espa&#241;ol">
 					<img src="../images/flags/es.png" alt="Espa&#241;ol" /></a>
-					<a id="languageID4" class="language" href="javascript:setLanguage(4)" title="Portugu&#234;s">
+					<a id="languageID5" class="language" href="javascript:setLanguage(5)" title="Portugu&#234;s">
 					<img src="../images/flags/pt.png" alt="Portugu&#234;s" /></a>
-					<a id="languageID5" class="language" href="javascript:setLanguage(5)" title="Svenska">
+					<a id="languageID6" class="language" href="javascript:setLanguage(6)" title="Svenska">
 					<img src="../images/flags/se.png" alt="Svenska" /></a>
-					<a id="languageID6" class="language" href="javascript:setLanguage(6)" title="Suomi">
+					<a id="languageID7" class="language" href="javascript:setLanguage(7)" title="Suomi">
 					<img src="../images/flags/fi.png" alt="Suomi" /></a>
-					<a id="languageID7" class="language" href="javascript:setLanguage(7)" title="&#1088;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;">
-					<img src="../images/flags/ru.png" alt="&#1088;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;" /></a>
 					<div class="flagPadding"></div>
 				</div>
 				<div id="options1">
