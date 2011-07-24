@@ -38,6 +38,18 @@
 	    return this;
 	}
 
+
+	// Maps the index of the selected language to its name
+	var indexToLanguage = {
+		0 : "english",
+		1 : "french",
+		2 : "german",
+		3 : "italian",
+		4 : "spanish",
+		5 : "portuguese",
+		6 : "swedish",
+		7 : "finnish"
+	}
 	// Global variables for this page, store what feature and language have been selected
 	var selectedFeature = 0
 	var selectedLanguage = 0;
@@ -49,26 +61,18 @@
 		return rawText.value;
 	}
 
-	var indexToLanguage = {
-		0 : "english",
-		1 : "french",
-		2 : "german",
-		3 : "italian",
-		4 : "spanish",
-		5 : "portuguese",
-		6 : "swedish",
-		7 : "finnish"
-	}
-
 	/* Called when the analyse button is clicked. */
 	function analyse() {
 		// Get source text
 		var text = getText();
 
 		if (text != undefined && text != "") {
-			// Calclate statistics
-			var stemmerObject = new Stemmer(SANITISERS[selectedLanguage], indexToLanguage[selectedLanguage]);
-			var stoplist = new Stoplist(STOP_LISTS[selectedLanguage]);	
+			// Creates objects to clean up the text based on the selected language
+			var language = indexToLanguage[selectedLanguage];
+			var sanitiser = new Sanitiser(language);
+			var stemmerObject = new Stemmer(sanitiser, language);
+			var stoplist = new Stoplist(STOP_LISTS[language]);
+			// Detect messages and calculate statistics
 			var messages = processLog(text, stemmerObject, stoplist);
 			var stats = new ChatStatistics(messages);
 
@@ -134,7 +138,7 @@
 
 		} else {
 			$("#messageContainer").hide();
-			$("#messageContainer").html("<p class='textCenter red'><strong>Empty chat log provided.</strong></p>");
+			$("#messageContainer").html("<p class='textCenter red'><strong>No text provided.</strong></p>");
 			$("#messageContainer").show("slow").delay(3500).hide("slow");
 		}
 	}

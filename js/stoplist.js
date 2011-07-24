@@ -19,10 +19,10 @@ Stoplist.prototype.apply = function(text) {
 
 /* End of class Stoplist */
 
-// An array which contains every language's stoplist.
-var STOP_LISTS = [
+// An associative array which contains every supported language's stoplist.
+var STOP_LISTS = {
 
-	// English
+	"english" :
 	[
 		"a", "about", "above", "across", "after", "again",
 		"against", "all", "almost", "alone", "along", "already", "also", "although",
@@ -85,7 +85,7 @@ var STOP_LISTS = [
 		"mustnt", "wouldve", "shouldve", "couldve", "mightve", "mustve"
 	],
 
-	// French
+	"french" :
 	[
 		"a",  "beaucoup", "comment", "encore", "lequel", "moyennant", "près", "ses", "toujours",
 		"afin", "ça", "concernant", "entre", "les", "ne", "puis", "sien", "tous",
@@ -112,7 +112,7 @@ var STOP_LISTS = [
 		"à", "comme", "en", "le", "mon", "pourquoi", "selon", "ton"
 	],
 
-	// German
+	"german" :
 	[
 		"ab", "dann", "des", "es", "ihnen", "keinem", "obgleich", "sondern", "welchem",
 		"aber", "daran", "desselben", "etwa", "ihr", "keinen", "oder", "sonst", "welchen",
@@ -143,7 +143,7 @@ var STOP_LISTS = [
 		"daneben", "derselben", "er", "Ihnen", "keine", "ober", "solches", "welche"
 	],
 
-	// Italian
+	"italian" :
 	[
 		"a", "da", "durante", "lo", "o", "seppure", "un",
 		"affinchè", "dachè", "e", "loro", "onde", "si", "una",
@@ -168,7 +168,7 @@ var STOP_LISTS = [
 		"cosa", "dunque", "le", "nostro", "senza", "tutti"
 	],
 
-	// Spanish
+	"spanish" :
 	[
 		"a", "aquí", "cuantos", "esta", "misma", "nosotras", "querer", "tales", "usted",
 		"acá", "cada", "cuán", "estar", "mismas", "nosotros", "qué", "tan", "ustedes",
@@ -193,7 +193,7 @@ var STOP_LISTS = [
 		"aquellos", "cuanto", "esos", "mío", "nos", "que", "tal", "unos",
 	],
 
-	// Portuguese
+	"portuguese" :
 	[
 		"a", "bem", "e", "longe", "para", "se", "você",
 		"abaixo", "com", "ela", "mais", "por", "sem", "vocês",
@@ -207,7 +207,7 @@ var STOP_LISTS = [
 		"bastante", "direito", "junto", "ou", "quem", "vagarosamente"
 	],
 
-	// Swedish
+	"swedish" :
 	[
 		"ab", "du", "hette", "minst", "skall",
 		"aldrig", "efter", "hon", "minsta", "skulle",
@@ -252,7 +252,7 @@ var STOP_LISTS = [
 		"detta", "heter", "mindre", "ska"
 	],
 
-	// Finnish
+	"finnish" :
 	[
 		"ään", "jälkeen", "kumpi", "nopeasti", "suoraan",
 		"ah", "jo", "kumpikaan", "nuo", "ta",
@@ -293,4 +293,4 @@ var STOP_LISTS = [
 		"jahka", "kumpainenkin", "niin", "stä"
 	]
 
-];
+};

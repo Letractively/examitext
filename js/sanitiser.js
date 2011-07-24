@@ -1,98 +1,44 @@
-var SANITISERS = [
-
-	// English
-	/* Sanitises an English word by removing all non-alphanumeric characters,
-	 * whitespace and not returning words less than 3 characters long. */
-	function (word) {
-		// Removes non-alphanumeric characters from the word, EXCEPT for dashes!
-		// NOTE: Use /[^a-zA-Z0-9]+/g to remove dashes too	
-		var sanitisedWord = word.replace(/[^a-zA-Z0-9-]+/g, '');
-		sanitisedWord = sanitisedWord.toLowerCase();
-		// Makes sure to return an empty string if the word is less than 3
-		// characters long. This tells the stemmer to just completely
-		// ignore the word.
-		if (sanitisedWord.length < 3) {
-			return "";
-		} else {
-			return sanitisedWord;
-		}
-	},
-
-	// French
-	function (word) {
-		return word;
-		var sanitisedWord = word.replace(/TODO/, '');
-		if (sanitisedWord.length < 3) {
-			return "";
-		} else {
-			return sanitisedWord;
-		}
-	},
-
-	// German
-	function (word) {
-		return word;
-		var sanitisedWord = word.replace(/TODO/, '');
-		if (sanitisedWord.length < 3) {
-			return "";
-		} else {
-			return sanitisedWord;
-		}
-	},
-
-	// Italian
-	function (word) {
-		return word;
-		var sanitisedWord = word.replace(/TODO/, '');
-		if (sanitisedWord.length < 3) {
-			return "";
-		} else {
-			return sanitisedWord;
-		}
-	},
-
-	// Spanish
-	function (word) {
-		return word;
-		var sanitisedWord = word.replace(/TODO/, '');
-		if (sanitisedWord.length < 3) {
-			return "";
-		} else {
-			return sanitisedWord;
-		}
-	},
-	
-	// Portuguese
-	function (word) {
-		return word;
-		var sanitisedWord = word.replace(/TODO/, '');
-		if (sanitisedWord.length < 3) {
-			return "";
-		} else {
-			return sanitisedWord;
-		}
-	},
-	
-	// Swedish
-	function (word) {
-		return word;
-		var sanitisedWord = word.replace(/TODO/, '');
-		if (sanitisedWord.length < 3) {
-			return "";
-		} else {
-			return sanitisedWord;
-		}
-	},
-	
-	// Finnish
-	function (word) {
-		return word;
-		var sanitisedWord = word.replace(/TODO/, '');
-		if (sanitisedWord.length < 3) {
-			return "";
-		} else {
-			return sanitisedWord;
-		}
+/* Start of class Sanitiser. */
+function Sanitiser(language) {
+	this.language = language;
+	this.regex = /[^a-zA-Z0-9-]+/g; // default regex is for English
+	switch (language) {
+		case "french":
+			this.regex = /[^a-zA-Z0-9-ÀÂÄÈÉÊËÎÏÔŒÙÛÜŸàâäèéêëîïôœùûüÿÇç]+/g;
+			break;
+		case "german":
+			this.regex = /[^a-zA-Z0-9-ÄäÖöÜüß]+/g;
+			break;
+		case "italian":
+			this.regex = /[^a-zA-Z0-9-ÀÈÉÌÒÓÙàèéìòóù]+/g;
+			break;
+		case "spanish":
+			this.regex = /[^a-zA-Z0-9-ÁÉÍÓÚÑÜáéíóúñü]+/g;
+			break;
+		case "portuguese":
+			this.regex = /[^a-zA-Z0-9-ÀÁÂÃÉÊÍÓÔÕÚÜàáâãéêíóôõúüÇç]+/g;
+			break;
+		case "swedish":
+			this.regex = /[^a-zA-Z0-9-ÅåÄäÖö]+/g;
+			break;
+		case "finnish":
+			this.regex = /[^a-zA-Z0-9-ÅåÄäÖö]+/g;
+			break;
 	}
+}
 
-];
+Sanitiser.prototype.sanitise = function(word) {
+	var sanitisedWord = word.replace(this.regex, '');
+	sanitisedWord = sanitisedWord.toLowerCase();
+	
+	// Makes sure to return an empty string if the word is less than 3
+	// characters long. This tells the stemmer to just completely
+	// ignore the word.
+	if (sanitisedWord.length < 3) {
+		return "";
+	} else {
+		return sanitisedWord;
+	}
+}
+
+/* End of class Sanitiser. */
