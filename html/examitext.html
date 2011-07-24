@@ -16,6 +16,7 @@
 	<script type="text/javascript" src="../js/highcharts_wrapper.js"></script>
 
 	<script type="text/javascript" src="../js/util.js"></script>
+	<script type="text/javascript" src="../js/sanitiser.js"></script>
 	<script type="text/javascript" src="../js/stemmer.js"></script>
 	<script type="text/javascript" src="../js/stoplist.js"></script>
 	<script type="text/javascript" src="../js/log_processor.js"></script>
@@ -54,8 +55,8 @@
 
 		if (text != undefined && text != "") {
 			// Calclate statistics
-			var stemmerObject = new Stemmer(sanitiseWord, stemmer);
-			var stoplist = new Stoplist(STOP_LIST);	
+			var stemmerObject = new Stemmer(SANITISERS[selectedLanguage], STEMMERS[selectedLanguage]);
+			var stoplist = new Stoplist(STOP_LISTS[selectedLanguage]);	
 			var messages = processLog(text, stemmerObject, stoplist);
 			var stats = new ChatStatistics(messages);
 
@@ -224,7 +225,7 @@
 				</div>
 				<div id="options1">
 					<div class="progLanguagePadding"></div>
-					<a id="progLanguageID0" class="language" href="javascript:setProgLanguage(0)" title="HTML">
+					<a id="progLanguageID0" class="language selected" href="javascript:setProgLanguage(0)" title="HTML">
 					<img src="../images/proglanguages/html.png" alt="HTML" /></a>
 					<a id="progLanguageID1" class="language" href="javascript:setProgLanguage(1)" title="JavaScript">
 					<img src="../images/proglanguages/js.png" alt="JavaScript" /></a>
