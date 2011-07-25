@@ -10,17 +10,10 @@
 /* Start of class TaskQueue */
 function TaskQueue(updateInterval) {
 	this.updateInterval = updateInterval;
-	this.tasks = [];
-
-	this.intervalID = 0;
-	this.running = false;
-	this.currentTask = undefined;
-	this.returnValue = undefined;
+	this.reset();
 }
 
 TaskQueue.prototype.update = function() {
-	if (this.tasks.length == 0) alert("FUCK!");
-
 	var temp = this.currentTask.run(this.returnValue);
 	if (temp) { // if non-zero(false) defined value returned
 		this.tasks.splice(0, 1);
@@ -30,8 +23,6 @@ TaskQueue.prototype.update = function() {
 		// If there are no more tasks left, just stop the queue from running
 		} else {
 			this.stop();
-			this.currentTask = undefined;
-			this.returnValue = undefined;
 		}
 	}
 }
@@ -54,12 +45,20 @@ TaskQueue.prototype.start = function () {
 TaskQueue.prototype.stop = function () {
 	if (this.running) {
 		clearInterval(this.intervalID);
-		this.intervalID = 0;
-		this.running = false;
+		this.reset();
 		return true;
 	} else {
 		return false;
 	}
+}
+
+
+TaskQueue.prototype.reset = function () {
+	this.intervalID = 0;
+	this.running = false;
+	this.tasks = []; // removes all scheduled tasks
+	this.currentTask = undefined;
+	this.returnValue = undefined;
 }
 
 TaskQueue.instance = new TaskQueue(20);

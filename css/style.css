@@ -82,6 +82,8 @@ textarea { resize: none; width:100%; }
 #formContainer table { width: 780px; position: relative; top: 10px; left: 10px; }
 #formContainer textarea { width: 760px; }
 
+#messageContainer { padding: 20px; }
+
 /* Result related IDs/classes. */
 #resultsContainer table { margin: 30px; }
 #resultsContainer th { text-align: center; font-weight: bold; color: #48F; padding: 5px; }

@@ -154,10 +154,21 @@
 				TaskQueue.instance.add(new ChatStatistics(showMessage));
 				TaskQueue.instance.add(new FunctionWrapper(displayStats));
 				TaskQueue.instance.start();
+
+				$("#buttonContainer").html("<a href='javascript:cancelAnalysis()' class='button'>Cancel</a><br /><br />");
 			}
 		} else {
 			showMessage("No text provided.", 4000);
 		}
+	}
+
+	function cancelAnalysis() {
+		TaskQueue.instance.stop();
+
+		$("#buttonContainer").html(
+			"<a href='javascript:analyse()'' class='button'>Analyse</a><br /><br />");
+		// Hides message container then clears its content
+		$("#messageContainer").hide("fast").html("");
 	}
 
 	function returnToUploader() {
@@ -271,13 +282,10 @@
 					<img src="../images/proglanguages/cpp.png" alt="C++" /></a>
 					<div class="progLanguagePadding"></div>
 				</div>
-
-				<!-- Contains messages (typically error messages) to show to the user. -->
-				<br />
-				<div id="messageContainer"></div>
-				<br />
-				<br />
 			</div>
+
+			<!-- Contains messages (typically error messages) to show to the user. -->
+			<div id="messageContainer"></div>
 
 			<!-- Empty at the moment, just here so the div is created. -->
 			<div id="resultsContainer">
@@ -287,7 +295,6 @@
 			</div>
 
 			<div id="buttonContainer">
-				
 				<a href="javascript:analyse()" class="button">Analyse</a>
 				<br />
 				<br />
