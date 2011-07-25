@@ -127,7 +127,7 @@ DocumentStatistics.prototype.run = function(value) {
 
 DocumentStatistics.prototype.numberOf = function(character) {
 	// number of specific character (really just used for puncuation)
-	return this.text.split(character).length;
+	return this.text.split(character).length - 1;
 }
 
 DocumentStatistics.prototype.getParagraphCount = function() {

@@ -91,7 +91,7 @@ textarea { resize: none; width:100%; }
 
 .topTable table { float: left; width: 300px; }
 
-#areaGraphContainer { width: 760px; height: 300px; }
+#areaGraphContainer { padding-top: 20px; width: 760px; height: 300px; }
 #pieChartContainer { width: 760px; height: 300px; }
 
 
