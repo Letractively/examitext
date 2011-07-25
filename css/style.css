@@ -89,7 +89,7 @@ textarea { resize: none; width:100%; }
 #resultsContainer th { text-align: center; font-weight: bold; color: #48F; padding: 5px; }
 #resultsContainer td { text-align: center;}
 
-.topTable table { float: left; width: 300px; background-color: red; }
+.topTable table { float: left; width: 300px; }
 
 #pieChartContainer { width: 760px; height: 300px; }
 

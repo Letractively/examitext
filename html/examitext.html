@@ -21,6 +21,7 @@
 	<script type="text/javascript" src="../js/sanitiser.js"></script>
 	<script type="text/javascript" src="../js/stemmer.js"></script>
 	<script type="text/javascript" src="../js/stoplist.js"></script>
+	<script type="text/javascript" src="../js/document_processor.js"></script>
 	<script type="text/javascript" src="../js/log_processor.js"></script>
 	<script type="text/javascript">
 
@@ -61,14 +62,51 @@
 		return rawText.value;
 	}
 
-	/*  Draws the calculated chat log stats. */
-	function displayStats(stats) {
+	/* Functions for displaying the calculated statistics. */
+	function displayDocumentStats(stats) {
+		showMessage("Generating display...");
+		
+		var statTable = "<table style='margin: 0 auto'><tr><th>Word Count</th><th>Sentence Count</th><th>Line Count</th>" +
+			"<th>Paragraph Count</th><th>Average Sentence Length</th></tr><tr><td>" + stats.wordCount +
+			"</td><td>" + stats.sentenceCount + "</td><td>" + stats.lineCount + "</td><td>" +
+			stats.paragraphCount + "</td><td>" + roundNumber(stats.averageSentenceLength, 2) +
+			"</td><td></tr></table>";
+		
+
+		var topWordsTable = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" +
+			"Top 10 Words</span></th></tr><tr><th>Word</th><th>Frequency</th><th>Relative Frequency</th></tr>";
+		var topWords = stats.getMostSaidWords(10);
+		for (var i in topWords) {
+			if (i >= 0 && i <= 2) { // large size fonts for top 3
+				topWordsTable += "<tr><td><span class='top" + i + "'>" + topWords[i][0] +
+					"</span></td><td><span class='top" + i + "'>" + topWords[i][1] + "</span></td>" +
+					"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
+			} else {
+				topWordsTable += "<tr><td>" + topWords[i][0] + "</td><td>" + topWords[i][1] + "</td>" +
+					"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
+			}
+		}
+		topWordsTable += "</table>";
+
+		$("#documentTableContainer").html(statTable);
+		$("#documentWordsContainer").html(topWordsTable);
+
+		$("#messageContainer").hide();
+		$("#formContainer").hide("fast");
+
+		$("#documentResultsContainer").hide();
+		$("#documentResultsContainer").show("fast");
+
+		$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
+	}
+
+	function displayChatlogStats(stats) {
 		showMessage("Generating display...");
 
 		// Now interpret them and show them
-		var statTable =  "<table><th>Participant</th>" +
+		var statTable =  "<table class='margin: 0 auto'><tr><th>Participant</th>" +
 		"<th>Percent of Messages</th><th>Number of Messages</th><th>Average Message " +
-		"Length</th><th>Average Message Density</th><th>Word Count</th>";
+		"Length</th><th>Average Message Density</th><th>Word Count</th></tr>";
 		var pieChartData = [ ];
 
 		for (var name in stats.participants) {
@@ -112,16 +150,22 @@
 			}
 		}
 
-		// Create tables/graphs from the results
-		$("#tableContainer").html(statTable);
-		$("#wordsContainer").html(tableOfTables);
-		createPieChart("pieChartContainer", "Message Contribution", pieChartData);
-		$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
+		// Show tables/graphs from the results
+		$("#logTableContainer").html(statTable);
+		$("#logWordsContainer").html(tableOfTables);
+		createPieChart("logPieChartContainer", "Message Contribution", pieChartData);
 
 		$("#messageContainer").hide();
 		$("#formContainer").hide("fast");
-		$("#resultsContainer").hide();
-		$("#resultsContainer").show("fast");
+
+		$("#logResultsContainer").hide();
+		$("#logResultsContainer").show("fast");
+
+		$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
+	}
+
+	function displaySourceFileStats(stats) {
+		showMessage("Generating display...");
 	}
 
 	function showMessage(message, showTime) { // NOTE: showTime is optional parameter
@@ -141,25 +185,68 @@
 	function analyse() {
 		// Get source text
 		var text = getText();
-
 		if (text != undefined && text != "") {
 			if (!TaskQueue.instance.running) {
-				// Creates objects to clean up the text based on the selected language
-				var language = indexToLanguage[selectedLanguage];
-				var sanitiser = new Sanitiser(language);
-				var stemmerObject = new Stemmer(sanitiser, language);
-				var stoplist = new Stoplist(STOP_LISTS[language]);
-
-				TaskQueue.instance.add(new LogProcessor(text, stemmerObject, stoplist, showMessage));
-				TaskQueue.instance.add(new ChatStatistics(showMessage));
-				TaskQueue.instance.add(new FunctionWrapper(displayStats));
-				TaskQueue.instance.start();
-
+				switch (selectedFeature) {
+					case 0: analyseDocument(text); break;
+					case 1: analyseChatlog(text); break;
+					case 2: analyseSourceFile(text); break;
+				}
 				$("#buttonContainer").html("<a href='javascript:cancelAnalysis()' class='button'>Cancel</a><br /><br />");
 			}
 		} else {
 			showMessage("No text provided.", 4000);
 		}
+	}
+
+	function analyseDocument(text) {
+		// Creates objects to clean up the text based on the selected language
+		var language = indexToLanguage[selectedLanguage];
+		var sanitiser = new Sanitiser(language);
+		var stemmerObject = new Stemmer(sanitiser, language);
+		var stoplist = new Stoplist(STOP_LISTS[language]);
+
+		TaskQueue.instance.add(new DocumentStatistics(text, stemmerObject, stoplist, showMessage));
+		TaskQueue.instance.add(new FunctionWrapper(displayDocumentStats));
+		TaskQueue.instance.start();
+	}
+
+	function analyseChatlog(text) {
+		var language = indexToLanguage[selectedLanguage];
+		var sanitiser = new Sanitiser(language);
+		var stemmerObject = new Stemmer(sanitiser, language);
+		var stoplist = new Stoplist(STOP_LISTS[language]);
+
+		TaskQueue.instance.add(new LogProcessor(text, stemmerObject, stoplist, showMessage));
+		TaskQueue.instance.add(new ChatStatistics(showMessage));
+		TaskQueue.instance.add(new FunctionWrapper(displayChatlogStats));
+		TaskQueue.instance.start();	
+	}
+
+	function analyseSourceFile(text) {
+		switch (selectedLanguage) {
+		case 0:
+			TaskQueue.instance.add(new HTMLStatistics(text));
+			TaskQueue.instance.add(new FunctionWrapper(displayHTMLStats));
+			break;
+		case 1:
+			TaskQueue.instance.add(new JSStatistics(text));
+			TaskQueue.instance.add(new FunctionWrapper(displayJSStats));
+			break;
+		case 2:
+			TaskQueue.instance.add(new JavaStatistics(text));
+			TaskQueue.instance.add(new FunctionWrapper(displayJavaStats));
+			break;
+		case 3:
+			TaskQueue.instance.add(new CSStatistics(text));
+			TaskQueue.instance.add(new FunctionWrapper(displayCSStats));
+			break;
+		case 4:
+			TaskQueue.instance.add(new CPPStatistics(text));
+			TaskQueue.instance.add(new FunctionWrapper(displayCPPStats));
+			break;
+		}
+		TaskQueue.instance.start();
 	}
 
 	function cancelAnalysis() {
@@ -172,9 +259,11 @@
 	}
 
 	function returnToUploader() {
-		$("#buttonContainer").html("<a href='javascript:analyse()'' class='button'>Analyse</a><br /><br />");
+		$("#documentResultsContainer").hide("fast");
+		$("#logResultsContainer").hide("fast");
 		$("#messageContainer").hide();
-		$("#resultsContainer").hide("fast");
+		$("#buttonContainer").html("<a href='javascript:analyse()'' class='button'>Analyse</a><br /><br />");
+		
 		$("#formContainer").show("fast");
 	}
 
@@ -287,11 +376,18 @@
 			<!-- Contains messages (typically error messages) to show to the user. -->
 			<div id="messageContainer"></div>
 
-			<!-- Empty at the moment, just here so the div is created. -->
+			<!-- Empty at the moment, just here so the divs are created. -->
 			<div id="resultsContainer">
-				<div id="tableContainer"></div>
-				<div id="pieChartContainer"></div>
-				<div id="wordsContainer"></div>
+				<div style="padding-top: 20px"></div>
+				<div id="documentResultsContainer">
+					<div id="documentTableContainer"></div>
+					<div id="documentWordsContainer"></div>
+				</div>
+				<div id="logResultsContainer">
+					<div id="logTableContainer"></div>
+					<div id="logPieChartContainer"></div>
+					<div id="logWordsContainer"></div>
+				</div>
 			</div>
 
 			<div id="buttonContainer">
@@ -311,7 +407,6 @@
 	<script type="text/javascript">
 		$("#container").center();
 		$("#messageContainer").hide();
-		$("#resultsContainer").hide();
 		$("#options1").hide();
 	</script>
 

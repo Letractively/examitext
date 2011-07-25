@@ -295,17 +295,4 @@ function trim(s) {
 	return s;
 }
 
-/* Converts an object into an array of tuples, where each tuple
- * contains a key and its respective value. Additionally, this
- * function sorts the tuples by their second element (the values
- * in the object). */
-function toSortedTuples(obj) {
-    var tuples = [];
-
-    for (var key in obj) tuples.push([key, obj[key]]);
-    tuples.sort(function(a, b) { return a[1] < b[1] ? 1 : a[1] > b[1] ? -1 : 0 });
-
-    return tuples;
-}
-
 /* End of utility functions. */
