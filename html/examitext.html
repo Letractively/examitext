@@ -67,10 +67,10 @@
 		showMessage("Generating display...");
 		
 		var statTable = "<table style='margin: 0 auto'><tr><th>Word Count</th><th>Sentence Count</th><th>Line Count</th>" +
-			"<th>Paragraph Count</th><th>Average Sentence Length</th></tr><tr><td>" + stats.wordCount +
-			"</td><td>" + stats.sentenceCount + "</td><td>" + stats.lineCount + "</td><td>" +
-			stats.paragraphCount + "</td><td>" + roundNumber(stats.averageSentenceLength, 2) +
-			"</td><td></tr></table>";
+			"<th>Paragraph Count</th><th>Average Sentence Length</th><th>Average Paragraph Length</th></tr>" +
+			"<tr><td>" + stats.wordCount + "</td><td>" + stats.sentenceCount + "</td><td>" + stats.lineCount + "</td><td>" +
+			stats.getParagraphCount() + "</td><td>" + roundNumber(stats.averageSentenceLength, 2) + "</td><td>" +
+			roundNumber(stats.getAverageParagraphLength(), 2) + "</td><td></tr></table>";
 		
 
 		var topWordsTable = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" +
@@ -88,14 +88,29 @@
 		}
 		topWordsTable += "</table>";
 
-		$("#documentTableContainer").html(statTable);
-		$("#documentWordsContainer").html(topWordsTable);
+		var punctuationTable = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" +
+			"Punctuation</span></th></tr><tr><th>Punctuation</th><th>Frequency</th></tr>";
+		var characters = [ ".", ",", ";", ":", "?", "!", "\'", "\"", "-" ];
+		for (var i in characters) {
+			var ch = characters[i];
+			punctuationTable += "<tr><td>" + ch + "</td><td>" + stats.numberOf(ch) + "</td></tr>";
+		}
+		punctuationTable += "</table>";
+
+		var tableOfTables = "<table width'650px'><tr><td>" + topWordsTable + "</td><td>" +
+			punctuationTable + "</td></tr></table>";
+
+		$("#resultsContainer").html("<div>" + statTable + "</div><div id='areaGraphContainer'></div>" +
+			"<div>" + tableOfTables + "</div>");
+		createAreaGraph("areaGraphContainer", "Document Trends", "Number of characters",
+			function() { return "Paragraph " + this.x + " has " + this.y + " characters" },
+			[{ name : "Paragraph Length", data : stats.paragraphLengths }]);
 
 		$("#messageContainer").hide();
 		$("#formContainer").hide("fast");
 
-		$("#documentResultsContainer").hide();
-		$("#documentResultsContainer").show("fast");
+		$("#resultsContainer").hide();
+		$("#resultsContainer").show("fast");
 
 		$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
 	}
@@ -149,17 +164,16 @@
 				tableOfTables += "<td>" + topWordTables[i] + "</td></tr>";
 			}
 		}
+		tableOfTables += "</table>"
 
 		// Show tables/graphs from the results
-		$("#logTableContainer").html(statTable);
-		$("#logWordsContainer").html(tableOfTables);
-		createPieChart("logPieChartContainer", "Message Contribution", pieChartData);
+		$("#resultsContainer").html("<div>" + statTable + "</div><div id='pieChartContainer'></div><div>" + tableOfTables + "</div>");
+		createPieChart("pieChartContainer", "Message Contribution", pieChartData);
 
+		$("#resultsContainer").hide();
+		$("#resultsContainer").show("fast");
 		$("#messageContainer").hide();
 		$("#formContainer").hide("fast");
-
-		$("#logResultsContainer").hide();
-		$("#logResultsContainer").show("fast");
 
 		$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
 	}
@@ -259,8 +273,7 @@
 	}
 
 	function returnToUploader() {
-		$("#documentResultsContainer").hide("fast");
-		$("#logResultsContainer").hide("fast");
+		$("#resultsContainer").hide("fast");
 		$("#messageContainer").hide();
 		$("#buttonContainer").html("<a href='javascript:analyse()'' class='button'>Analyse</a><br /><br />");
 		
@@ -376,19 +389,10 @@
 			<!-- Contains messages (typically error messages) to show to the user. -->
 			<div id="messageContainer"></div>
 
+			<div style="padding-top: 20px"></div>
+
 			<!-- Empty at the moment, just here so the divs are created. -->
-			<div id="resultsContainer">
-				<div style="padding-top: 20px"></div>
-				<div id="documentResultsContainer">
-					<div id="documentTableContainer"></div>
-					<div id="documentWordsContainer"></div>
-				</div>
-				<div id="logResultsContainer">
-					<div id="logTableContainer"></div>
-					<div id="logPieChartContainer"></div>
-					<div id="logWordsContainer"></div>
-				</div>
-			</div>
+			<div id="resultsContainer"></div>
 
 			<div id="buttonContainer">
 				<a href="javascript:analyse()" class="button">Analyse</a>

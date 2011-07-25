@@ -10,6 +10,7 @@ function DocumentStatistics(text, stemmer, stoplist, sendMessage) {
 	this.currentIndex = 0;
 
 	// Will contain statistics calculated
+	this.paragraphLengths = [];
 	this.wordFrequencies = {};
 	this.relativeWordFrequencies = {};
 	this.wordCount = 0;
@@ -25,7 +26,14 @@ DocumentStatistics.prototype.run = function(value) {
 		this.sendMessage("Calculating general statistics...");
 
 		this.lineCount = this.text.count("\n");
-		this.paragraphCount = this.text.replace(/\n$/gm, '').split(/\n/).length;
+
+		// Calculates paragraph amount, length of each paragraph and
+		// average paragraph size
+		var paragraphs = this.text.replace(/\n$/gm, '').split(/\n/);
+		this.paragraphLengths = [];
+		for (var i in paragraphs) {
+			this.paragraphLengths.push(paragraphs[i].length);			
+		}
 
 		// Sentence count and average sentence length			
 		var sentences = this.text.split(".");
@@ -117,9 +125,21 @@ DocumentStatistics.prototype.run = function(value) {
 	}
 }
 
-DocumentStatistics.prototype.numberOf = function(char) {
+DocumentStatistics.prototype.numberOf = function(character) {
 	// number of specific character (really just used for puncuation)
-	// TODO
+	return this.text.split(character).length;
+}
+
+DocumentStatistics.prototype.getParagraphCount = function() {
+	return this.paragraphLengths.length;
+}
+
+DocumentStatistics.prototype.getAverageParagraphLength = function() {
+	var total = 0;
+	for (var i in this.paragraphLengths) {
+		total += this.paragraphLengths[i];
+	}
+	return total / this.getParagraphCount();
 }
 
 DocumentStatistics.prototype.getMostSaidWords = function(amount) {

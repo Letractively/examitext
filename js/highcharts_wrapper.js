@@ -8,7 +8,7 @@
  * the the first element is the name of a segment and second
  * element is how much of the pie chart that segment will take. */
 function createPieChart(id, title, data) {
-	var chart = new Highcharts.Chart({
+	return new Highcharts.Chart({
 		chart : {
 			renderTo : id,
 			type : "pie",
@@ -18,7 +18,7 @@ function createPieChart(id, title, data) {
 		},
 
 		title: {
-			text: "Message Contribution"
+			text: title
 		},
 
 		tooltip: {
@@ -47,6 +47,41 @@ function createPieChart(id, title, data) {
 			name: title,
 			data : data
 		}]
+
+	});
+}
+
+/* Argument 1: ID of the container which will contain the chart.
+ * Argument 2: Title of the chart.
+ * Argument 3: Label of the y-axis.
+ * Argument 4: A function which returns a string that determines
+ * the format of the tooltip text.
+ * Argument 5: An array which contains objects which have a name
+ * property and a data property (that is an array of the data to
+ * show on the graph). Each object will be represented as a line
+ * with area. */
+function createAreaGraph(id, title, yLabel, tooltipFormatter, data) {
+	return new Highcharts.Chart({
+		chart: {
+			renderTo: id,
+			defaultSeriesType: "area"
+		},
+
+		title: {
+			text: title
+		},
+
+		yAxis: {
+			title: {
+				text: yLabel
+			}	
+		},
+
+		tooltip: {
+			formatter : tooltipFormatter
+		},
+
+		series : data
 
 	});
 }
