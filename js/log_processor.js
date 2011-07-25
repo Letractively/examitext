@@ -284,15 +284,3 @@ LogProcessor.prototype.run = function(value) {
 }
 
 /* End of class LogProcessor */
-
-/* Start of utility functions. */
-
-/* Remove multiple, leading or trailing spaces */
-function trim(s) {
-	s = s.replace(/(^\s*)|(\s*$)/gi,"");
-	s = s.replace(/[ ]{2,}/gi," ");
-	s = s.replace(/\n /,"\n");
-	return s;
-}
-
-/* End of utility functions. */

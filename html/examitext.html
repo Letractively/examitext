@@ -23,6 +23,8 @@
 	<script type="text/javascript" src="../js/stoplist.js"></script>
 	<script type="text/javascript" src="../js/document_processor.js"></script>
 	<script type="text/javascript" src="../js/log_processor.js"></script>
+	<script type="text/javascript" src="../js/code_processor.js"></script>
+	<script type="text/javascript" src="../js/displayer.js"></script>
 	<script type="text/javascript">
 
 	/* Useful for dynamically placing elements at the centre of the screen. */
@@ -60,139 +62,6 @@
 	function getText() {
 		var rawText = document.forms("logForm").elements["rawText"];
 		return rawText.value;
-	}
-
-	/* Functions for displaying the calculated statistics. */
-	function displayDocumentStats(stats) {
-		showMessage("Generating display...");
-		
-		var statTable = "<table style='margin: 0 auto'><tr><th>Word Count</th><th>Sentence Count</th><th>Line Count</th>" +
-			"<th>Paragraph Count</th><th>Average Sentence Length</th><th>Average Paragraph Length</th></tr>" +
-			"<tr><td>" + stats.wordCount + "</td><td>" + stats.sentenceCount + "</td><td>" + stats.lineCount + "</td><td>" +
-			stats.getParagraphCount() + "</td><td>" + roundNumber(stats.averageSentenceLength, 2) + "</td><td>" +
-			roundNumber(stats.getAverageParagraphLength(), 2) + "</td><td></tr></table>";
-		
-
-		var topWordsTable = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" +
-			"Top 10 Words</span></th></tr><tr><th>Word</th><th>Frequency</th><th>Relative Frequency</th></tr>";
-		var topWords = stats.getMostSaidWords(10);
-		for (var i in topWords) {
-			if (i >= 0 && i <= 2) { // large size fonts for top 3
-				topWordsTable += "<tr><td><span class='top" + i + "'>" + topWords[i][0] +
-					"</span></td><td><span class='top" + i + "'>" + topWords[i][1] + "</span></td>" +
-					"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
-			} else {
-				topWordsTable += "<tr><td>" + topWords[i][0] + "</td><td>" + topWords[i][1] + "</td>" +
-					"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
-			}
-		}
-		topWordsTable += "</table>";
-
-		var punctuationTable = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" +
-			"Punctuation</span></th></tr><tr><th>Punctuation</th><th>Frequency</th></tr>";
-		var characters = [ ".", ",", ";", ":", "?", "!", "\'", "\"", "-" ];
-		for (var i in characters) {
-			var ch = characters[i];
-			punctuationTable += "<tr><td>" + ch + "</td><td>" + stats.numberOf(ch) + "</td></tr>";
-		}
-		punctuationTable += "</table>";
-
-		var tableOfTables = "<table width'650px'><tr><td>" + topWordsTable + "</td><td>" +
-			punctuationTable + "</td></tr></table>";
-
-		$("#resultsContainer").html("<div>" + statTable + "</div><div id='areaGraphContainer'></div>" +
-			"<div>" + tableOfTables + "</div>");
-		createAreaGraph("areaGraphContainer", "Document Trends", "Number of characters",
-			function() { return "Paragraph " + this.x + " has " + this.y + " characters" },
-			[{ name : "Paragraph Length", data : stats.paragraphLengths }]);
-
-		$("#messageContainer").hide();
-		$("#formContainer").hide("fast");
-
-		$("#resultsContainer").hide();
-		$("#resultsContainer").show("fast");
-
-		$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
-	}
-
-	function displayChatlogStats(stats) {
-		showMessage("Generating display...");
-
-		// Now interpret them and show them
-		var statTable =  "<table class='margin: 0 auto'><tr><th>Participant</th>" +
-		"<th>Percent of Messages</th><th>Number of Messages</th><th>Average Message " +
-		"Length</th><th>Average Message Density</th><th>Word Count</th></tr>";
-		var pieChartData = [ ];
-
-		for (var name in stats.participants) {
-			var participant = stats.participants[name];
-
-			statTable += "<tr><td>" + name + "</td><td>" + roundNumber(participant.percentOfMessages, 2) +
-				"%</td><td>" + participant.getMessageCount() + "</td><td>" + roundNumber(participant.getAverageMessageLength(), 2) +
-				"</td><td>" + roundNumber(participant.getAverageMessageDensity(), 2) + "</td><td>" + participant.getWordCount() + "</tr>";
-			pieChartData.push([name, participant.percentOfMessages]);
-		}
-
-		statTable += "</table>";
-
-		// Generates tables to show the top 10 words for each participant
-		var topWordTables = [];
-		for (var name in stats.participants) {
-			var current = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" + name +
-				"'s Top 10 Words</span></th></tr><tr><th>Word</th><th>Frequency</th><th>Relative Frequency</th></tr>";
-
-			var topWords = stats.participants[name].getMostSaidWords(10);
-			for (var i in topWords) {
-				if (i >= 0 && i <= 2) { // large size fonts for top 3
-					current += "<tr><td><span class='top" + i + "'>" + topWords[i][0] +
-						"</span></td><td><span class='top" + i + "'>" + topWords[i][1] + "</span></td>" +
-						"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
-				} else {
-					current += "<tr><td>" + topWords[i][0] + "</td><td>" + topWords[i][1] + "</td>" +
-						"<td>" + roundNumber(topWords[i][2], 2) + "</td></tr>";
-				}
-			}
-			current += "</table>";
-
-			topWordTables.push(current);
-		}
-		var tableOfTables = "<table width='650px'>";
-		for (var i in topWordTables) {
-			if (i % 2 == 0) {
-				tableOfTables += "<tr><td>" + topWordTables[i] + "</td>";
-			} else {
-				tableOfTables += "<td>" + topWordTables[i] + "</td></tr>";
-			}
-		}
-		tableOfTables += "</table>"
-
-		// Show tables/graphs from the results
-		$("#resultsContainer").html("<div>" + statTable + "</div><div id='pieChartContainer'></div><div>" + tableOfTables + "</div>");
-		createPieChart("pieChartContainer", "Message Contribution", pieChartData);
-
-		$("#resultsContainer").hide();
-		$("#resultsContainer").show("fast");
-		$("#messageContainer").hide();
-		$("#formContainer").hide("fast");
-
-		$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
-	}
-
-	function displaySourceFileStats(stats) {
-		showMessage("Generating display...");
-	}
-
-	function showMessage(message, showTime) { // NOTE: showTime is optional parameter
-		$("#messageContainer").html("<p class='textCenter red'><strong>" + message + "</strong></p>");
-		if (!$("#messageContainer").is(":visible")) {
-			$("#messageContainer").hide();
-			$("#messageContainer").show("slow");
-		}
-	
-		// If a show time was given, wait for the given time then hide the message
-		if (showTime) {
-			$("#messageContainer").delay(showTime).hide("slow");
-		}
 	}
 
 	/* Called when the analyse button is clicked. */
@@ -240,23 +109,23 @@
 	function analyseSourceFile(text) {
 		switch (selectedLanguage) {
 		case 0:
-			TaskQueue.instance.add(new HTMLStatistics(text));
+			TaskQueue.instance.add(new HTMLStatistics(text, showMessage));
 			TaskQueue.instance.add(new FunctionWrapper(displayHTMLStats));
 			break;
 		case 1:
-			TaskQueue.instance.add(new JSStatistics(text));
+			TaskQueue.instance.add(new JSStatistics(text, showMessage));
 			TaskQueue.instance.add(new FunctionWrapper(displayJSStats));
 			break;
 		case 2:
-			TaskQueue.instance.add(new JavaStatistics(text));
+			TaskQueue.instance.add(new JavaStatistics(text, showMessage));
 			TaskQueue.instance.add(new FunctionWrapper(displayJavaStats));
 			break;
 		case 3:
-			TaskQueue.instance.add(new CSStatistics(text));
+			TaskQueue.instance.add(new CSStatistics(text, showMessage));
 			TaskQueue.instance.add(new FunctionWrapper(displayCSStats));
 			break;
 		case 4:
-			TaskQueue.instance.add(new CPPStatistics(text));
+			TaskQueue.instance.add(new CPPStatistics(text, showMessage));
 			TaskQueue.instance.add(new FunctionWrapper(displayCPPStats));
 			break;
 		}

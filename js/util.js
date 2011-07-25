@@ -1,6 +1,15 @@
 /* Useful, general-purpose utility functions used in more than
  * one source file. */
 
+/* Remove multiple, leading or trailing spaces */
+function trim(s) {
+    s = s.replace(/(^\s*)|(\s*$)/gi,"");
+    s = s.replace(/[ ]{2,}/gi," ");
+    s = s.replace(/\n /,"\n");
+    return s;
+}
+
+
 /* Rounds a number to the specified amount of decimal places.
  *  num - Number to round.
  *  dec - How many decimal places you want to round to.
