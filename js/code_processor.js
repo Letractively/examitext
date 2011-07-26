@@ -1,17 +1,6 @@
-/* Useful function for finding how many pairs of tags with the given
- * name 'tag' there are in 'text'. 'closing' should be set to true
- * if the tag you're looking for is a self-closing tag, like <img />. */
- function numTags(text, tag, closing) {
- 	var re = undefined;
- 	if (closing) {
- 		re = new RegExp("<" + tag + "[^>]+>", "g");
- 	} else {
- 		re = new RegExp("<" + tag + "[^>]*>(.*?)<\/" + tag + ">", "g"); 
- 	}
-	var matches = text.match(re);
-
-	return ((matches == null) ? 0 : matches.length);;
-}
+/* ---------------------------------------------------------- */
+/*                            HTML                            */
+/* ---------------------------------------------------------- */
 
 function HTMLStatistics(text, sendMessage) {
 	this.text = text;
@@ -20,7 +9,7 @@ function HTMLStatistics(text, sendMessage) {
 
 	this.totalLines = 0;
 	this.whitespaceLines = 0;
-	this.commentCount = 0;
+	this.commentLines = 0;
 	this.codeLines = 0;
 
 	this.tagCount = 0;
@@ -29,6 +18,7 @@ function HTMLStatistics(text, sendMessage) {
 	this.frameCount = 0;
 	this.objectCount = 0;
 
+	this.totalStyleCount = 0;
 	this.cssIDCount = 0;
 	this.cssClassCount = 0;
 	this.inlineStyleCount = 0;
@@ -47,12 +37,86 @@ function HTMLStatistics(text, sendMessage) {
 
 HTMLStatistics.prototype.run = function(value) {
 	switch (this.stage) {
-	case 0: // basic statistics
-		this.sendMessage("Calculating initial statistics...");
+	case 0: // main parsing
+		this.sendMessage("Parsing HTML...");
 
-		//var lines = this.text.split(/\n|\r|\r\n/);
+		try {
+			var stats = this;
+			HTMLParser(this.text, {
+				start: function(tag, attrs, unary) {
+					// Tag counting
+					stats.tagCount += 1;
+					if (tag in stats.tagFrequencies) {
+						stats.tagFrequencies[tag] += 1;
+					} else {
+						stats.tagFrequencies[tag] = 1;
+					}
+
+					// Resource counting
+					if (tag == "style") {
+						stats.intStylesheetCount += 1;
+					} else if (tag == "link") {
+						// If it's got the rel attribute it says stylesheet, assume external stylesheet
+						for (var i in attrs) {
+							if (attrs[i].name == "rel" && attrs[i].escaped == "stylesheet") {
+								stats.extStylesheetCount += 1;
+								break;
+							}
+						}
+					} else if (tag == "script") {
+						var hasSrc = false;
+						for (var i in attrs) {
+							if (attrs[i].name == "src") {
+								stats.extScriptCount += 1;
+								hasSrc = true;
+								break;
+							}
+						}
+						// If <script> doesn't have a src attribute, just assume there's an internal script
+						if (!hasSrc) stats.intScriptCount += 1;
+					}
+
+					// Style counting
+					for (var i in attrs) {
+						// Tries to find style
+						var style = "";
+						if (attrs[i].name == "id") {
+							style = "#" + attrs[i].escaped;
+						} else if (attrs[i].name == "class") {
+							style = "." + attrs[i].escaped;
+						} else if (attrs[i].name == "style") {
+							style = "inline: { " + attrs[i].escaped + " }";
+						}
+						// If one was found, add it
+						if (style != "") {
+							if (style in stats.styleFrequencies) {
+								stats.styleFrequencies[style] += 1;
+							} else {
+								// Since this is a new style, update the counters!
+								if (style.charAt(0) == "#") stats.cssIDCount += 1;
+								else if (style.charAt(0) == ".") stats.cssClassCount += 1;
+								else if (style.substring(0, 6) == "inline") stats.inlineStyleCount += 1;
+
+								stats.styleFrequencies[style] = 1;
+							}
+						}
+					}
+				},
+
+				comment: function(text) {
+					stats.commentLines += text.split("\n").length;
+				}
+
+			});
+		} catch (err) {
+			// Error parsing text, set error flag to true
+			this.error = true;
+		}
+
+		// Calculates how many of each type of line there are (except for
+		// comment lines, which are calculated in the HTML Parser
 		var lines = this.text.split("\n");
-		this.totalLines = lines.length - 1;
+		this.totalLines = lines.length;
 
 		this.whitespaceLines = 0;
 		for (var i in lines) {
@@ -62,96 +126,32 @@ HTMLStatistics.prototype.run = function(value) {
 			}
 		}
 
-		// Tries to find all the comments using the regex
-		// From: http://ostermiller.org/findhtmlcomment.html
-		var commentMatches = this.text.match(/\<![ \r\n\t]*(--([^\-]|[\r\n]|-[^\-])*--[ \r\n\t]*)\>/);
-		this.commentCount = (commentMatches == null) ? 0 : commentMatches.length;
-		this.codeLines = this.totalLines - this.whitespaceLines - this.commentCount; // not quite accurate
+		this.codeLines = this.totalLines - this.whitespaceLines - this.commentLines;
 
-		this.tags = this.text.match(/<[^>]+>/ig);
-		if (this.tags == null) {
-			this.stage += 2; // skip next stage then if no tags
-		} else {
-			this.currentIndex = 0;
-			this.stage += 1;
-		}
-
+		this.stage += 1;
 		break;
-	case 1: // tag processing
-		var percent = (this.currentIndex / this.tags.length) * 100;
-		this.sendMessage("Processed " + roundNumber(percent, 2) + "% of tags...");
+	case 1: // relative frequency processing
+		this.sendMessage("Calculating relative frequencies...");
 
-		for (var count = 0; (count < 25); ++count) {
-			var tag = this.tags[this.currentIndex];
-
-			// First, strip everything but the name from the tag
-			tag = tag.replace("<", " ").replace(">", " ");
-			tag = trim(tag); // get rid of leading/trailing whitespace
-			tag = tag.replace(/\s{2,}/, " "); // make everything one space
-			tag = tag.split(" ")[0]; // get first word
-			tag = tag.replace(/[^a-zA-Z]+/g, ""); // delete non-alpha characters
-			// ignore empty tags
-			if (tag.length > 0) {
-				if (tag in this.tagFrequencies) {
-					this.tagFrequencies[tag] += 1;
-				} else {
-					this.tagFrequencies[tag] = 0;
-				}
-			}
-			
-			this.currentIndex += 1;
-			if (this.currentIndex >= this.tags.length) {
-				this.tagCount = this.tags.length;
-
-				for (var tag in this.tagFrequencies) {
-					this.relativeTagFrequencies[tag] = this.tagFrequencies[tag] / this.tagCount;
-				}
-
-				this.stage += 1;
-				break;
-			}
+		for (var tag in this.tagFrequencies) {
+			this.relativeTagFrequencies[tag] = this.tagFrequencies[tag] / this.tagCount;
 		}
 
+		this.totalStyleCount = this.cssIDCount + this.cssClassCount + this.inlineStyleCount;
+		for (var style in this.styleFrequencies) {
+			this.relativeStyleFrequencies[style] = this.styleFrequencies[style] / this.totalStyleCount;
+		}
+
+		this.stage += 1;
 		break;
 	case 2: // tag processing (cont.)
-		this.sendMessage("Processing tags...");
+		this.sendMessage("Counting tags...");
 
 		this.linkCount = this.tagFrequencies["a"] || 0;
 		this.imageCount = this.tagFrequencies["img"] || 0;
 		this.frameCount = (this.tagFrequencies["frame"] || 0) + (this.tagFrequencies["iframe"] || 0);
 		this.objectCount = this.tagFrequencies["object"] || 0;
 
-		this.stage += 1;
-		break;
-	case 3: // CSS processing (cont.)
-		
-		// TODO: count how many CSS styles and shit they are here
-
-		this.stage += 1;
-		break;
-	case 4: // CSS processing (cont.)
-		this.sendMessage("Processing CSS...");
-
-		// TODO
-		this.cssIDCount = 0; // count how many id='X' there are
-		this.cssClassCount = 0; // count many many class='X' there are
-		this.inlineStyleCount = 0; // count how many style='X' there are
-
-		this.stage += 1;
-		break;
-	case 5: // resource processing
-		this.sendMessage("Processing resources...");
-
-		// TODO
-		this.extStylesheetCount = 0; // count link rel="stylehseet"
-		this.intStylesheetCount = 0; // count <style>
-		this.extScriptCount = 0; // count <script> with hrefs
-		this.intScriptCount = 0; // count <script> tags with stuff inside
-
-		this.stage += 1;
-		break
-	case 6: // cleanup
-		this.currentIndex = undefined;
 		this.stage += 1;
 		return this;
 	}
@@ -186,3 +186,11 @@ HTMLStatistics.prototype.getMostUsedStyles = function(amount) {
 	}
 	return topStyles;
 }
+
+
+
+/* ---------------------------------------------------------- */
+/*                           General                          */
+/* ---------------------------------------------------------- */
+
+// TODO

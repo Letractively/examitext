@@ -39,8 +39,8 @@ CSS3 PIE is licensed under the terms of the Apache License Version 2.0, which
 can be read here:
 https://github.com/lojjic/PIE/blob/master/LICENSE-APACHE2.txt
 
-jsSnowball is licensed under the Mozilla Public License. Details available
-here: http://www.mozilla.org/MPL/
+jsSnowball and John Resig's HTML parser are licensed under the Mozilla Public
+License. Details available here: http://www.mozilla.org/MPL/
 
 Authors and Contacts
 --------

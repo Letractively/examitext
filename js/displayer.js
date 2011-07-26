@@ -136,7 +136,7 @@ function displayHTMLStats(stats) {
 	var lineTable = "<table style='margin: 0 auto'><tr><th colspan='4'>" +
 		"<span class='top1 text_center'>Lines</span></th></tr>" +
 		"<tr><th>Code</th><th>Comments</th><th>Whitespace</th><th>Total</th></tr>" +
-		"<tr><td>" + stats.codeLines + "</td><td>" + stats.commentCount + "</td><td>" +
+		"<tr><td>" + stats.codeLines + "</td><td>" + stats.commentLines + "</td><td>" +
 		stats.whitespaceLines + "</td><td>" + stats.totalLines + "</td></tr></table>";
 	var htmlTable = "<table style='margin: 0 auto'><tr><th colspan='5'>" +
 		"<span class='top1 text_center'>HTML</span></th></tr>" +
@@ -167,7 +167,7 @@ function displayHTMLStats(stats) {
 	var topStyles = stats.getMostUsedStyles(10);
 	for (var i in topStyles) {
 		topStyleTable += "<tr><td>" + topStyles[i][0] + "</td><td>" + topStyles[i][1] + "</td><td>"
-			+ roundedNumber(topStyles[i][2], 2) + "</td></tr>";
+			+ roundNumber(topStyles[i][2], 2) + "</td></tr>";
 	}
 	topStyleTable += "</table>";
 
@@ -176,4 +176,8 @@ function displayHTMLStats(stats) {
 	$("#resultsContainer").html(lineTable + htmlTable + cssTable + resourceTable + topTables);
 
 	showResultContainer();	
+	// Also display an error message if the stats object has signalled that one occurred
+	if (stats.error) {
+		showMessage("There was an error parsing the HTML file. As such, the displayed results may not be correct.");
+	}
 }
