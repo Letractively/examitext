@@ -108,14 +108,15 @@
 	}
 
 	function analyseSourceFile(text) {
-		switch (selectedLanguage) {
+		switch (selectedProgLanguage) {
 		case 0:
 			TaskQueue.instance.add(new HTMLStatistics(text, showMessage));
 			TaskQueue.instance.add(new FunctionWrapper(displayHTMLStats));
 			break;
 		case 1:
 			TaskQueue.instance.add(new JSStatistics(text, showMessage));
-			TaskQueue.instance.add(new FunctionWrapper(displayJSStats));
+			//TaskQueue.instance.add(new FunctionWrapper(displayJSStats));
+			TaskQueue.instance.add(new FunctionWrapper(displayProgLanguageStats));
 			break;
 		case 2:
 			TaskQueue.instance.add(new JavaStatistics(text, showMessage));

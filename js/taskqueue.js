@@ -73,8 +73,8 @@ function FunctionWrapper(func) {
 }
 
 FunctionWrapper.prototype.run = function(value) {
-	this.func(value);
-	return true;
+	var returnValue = this.func(value);
+	return (returnValue == undefined) ? true : returnValue;
 }
 
 /* End of class FunctionWrapper */

@@ -90,6 +90,7 @@ textarea { resize: none; width:100%; }
 #resultsContainer td { text-align: center;}
 
 .topTable table { float: left; width: 300px; }
+.timeComplexity { float: bottom; margin: 0 auto; width: 400px; padding: 20px; text-align: center; font-size: 14px; }
 
 #areaGraphContainer { padding-top: 20px; width: 760px; height: 300px; }
 #pieChartContainer { width: 760px; height: 300px; }
@@ -144,7 +145,7 @@ textarea { resize: none; width:100%; }
 
 	/* Hack because the damn button won't centre no matter what I do. */
 	position: relative;
-	left: 340px;
+	left: 350px;
 }.button:hover {
 	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed) );
 	background:-moz-linear-gradient( center top, #dfdfdf 5%, #ededed 100% );

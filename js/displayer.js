@@ -1,5 +1,23 @@
 /* Functions for displaying the calculated statistics. */
 
+function generateTable(title, headings, data) {
+	var table = "<table style='margin: 0 auto'>";
+	if (title && title != "") {
+		table += "<tr><th colspan='" + headings.length + "'><span class='top1 text_center'>" + title + "</span.</th></tr><tr>";
+	}
+
+	table += "<tr>";
+	for (var i in headings) {
+		table += "<th>" + headings[i] + "</th>";
+	}
+	table += "</tr><tr>";
+	for (var i in data) {
+		table += "<td>" + data[i] + "</td>";
+	}
+	table += "</tr></table>";
+	return table;
+}
+
 function showMessage(message, showTime) { // NOTE: showTime is optional parameter
 	$("#messageContainer").html("<p class='textCenter red'><strong>" + message + "</strong></p>");
 	if (!$("#messageContainer").is(":visible")) {
@@ -26,12 +44,10 @@ function showResultContainer() {
 function displayDocumentStats(stats) {
 	showMessage("Generating display...");
 	
-	var statTable = "<table style='margin: 0 auto'><tr><th>Word Count</th><th>Sentence Count</th><th>Line Count</th>" +
-		"<th>Paragraph Count</th><th>Average Sentence Length</th><th>Average Paragraph Length</th></tr>" +
-		"<tr><td>" + stats.wordCount + "</td><td>" + stats.sentenceCount + "</td><td>" + stats.lineCount + "</td><td>" +
-		stats.getParagraphCount() + "</td><td>" + roundNumber(stats.averageSentenceLength, 2) + "</td><td>" +
-		roundNumber(stats.getAverageParagraphLength(), 2) + "</td><td></tr></table>";
-	
+	var statTable = generateTable("", ["Words", "Sentences", "Lines", "Paragraphs", "Average Sentence Length",
+		"Average Paragraph Length"], [stats.wordCount, stats.sentenceCount, stats.lineCount,
+		stats.getParagraphCount(), roundNumber(stats.averageSentenceLength, 2),
+		roundNumber(stats.getAverageParagraphLength(), 2)]);
 
 	var topWordsTable = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" +
 		"Top 10 Words</span></th></tr><tr><th>Word</th><th>Frequency</th><th>Relative Frequency</th></tr>";
@@ -133,25 +149,15 @@ function displayChatlogStats(stats) {
 function displayHTMLStats(stats) {
 	showMessage("Generating display...");
 
-	var lineTable = "<table style='margin: 0 auto'><tr><th colspan='4'>" +
-		"<span class='top1 text_center'>Lines</span></th></tr>" +
-		"<tr><th>Code</th><th>Comments</th><th>Whitespace</th><th>Total</th></tr>" +
-		"<tr><td>" + stats.codeLines + "</td><td>" + stats.commentLines + "</td><td>" +
-		stats.whitespaceLines + "</td><td>" + stats.totalLines + "</td></tr></table>";
-	var htmlTable = "<table style='margin: 0 auto'><tr><th colspan='5'>" +
-		"<span class='top1 text_center'>HTML</span></th></tr>" +
-		"<tr><th>Tags</th><th>Links</th><th>Images</th><th>Frames</th><th>Embedded Objects</th></tr>" +
-		"<tr><td>" + stats.tagCount + "</td><td>" + stats.linkCount + "</td><td>" +
-		stats.imageCount + "</td><td>" + stats.frameCount + "</td><td>" + stats.objectCount + "</td></tr></table>";
-	var cssTable = "<table style='margin: 0 auto'><tr><th colspan='3'>" +
-		"<span class='top1 text_center'>CSS</span></th></tr>" +
-		"<tr><th>IDs</th><th>Classes</th><th>Inline Styles</th></tr><tr><td>" +
-		stats.cssIDCount + "</td><td>" + stats.cssClassCount + "</td><td>" + stats.inlineStyleCount + "</td></tr></table>";
-	var resourceTable = "<table style='margin: 0 auto'><tr><th colspan='4'>" +
-		"<span class='top1 text_center'>Resources</span></th></tr>" +
-		"<tr><th>Ext. Stylesheets</th><th>Int. Stylesheets</th><th>Ext. Scripts</th><th>Int. Scripts</th></tr>" +
-		"<tr><td>" + stats.extStylesheetCount + "</td><td>" + stats.intStylesheetCount + "</td><td>" +
-		 stats.extScriptCount + "</td><td>" + stats.intScriptCount + "</td></tr></table>"
+	var lineTable = generateTable("Lines", ["Code", "Comments", "Whitespace", "Total"],
+		[stats.codeLines, stats.commentLines, stats.whitespaceLines, stats.totalLines]);
+	var htmlTable = generateTable("HTML", ["Tags", "Links", "Images", "Frames", "Embedded Objects"],
+		[stats.tagCount, stats.linkCount, stats.imageCount, stats.frameCount, stats.objectCount]);
+	var cssTable = generateTable("CSS", ["IDs", "Classes", "Inline Styles"],
+		[stats.cssIDCount, stats.cssClassCount, stats.inlineStyleCount]);
+	var resourceTable = generateTable("Resources", ["Ext. Stylesheets", "Int. Stylesheets",
+		"Ext. Scripts", "Int. Scripts"], [stats.extStylesheetCount, stats.intStylesheetCount,
+		stats.extScriptCount, stats.intScriptCount]);
 
 	var topTagTable = "<table><tr><th colspan='3'><span class='top1 text_center'>Top 10 Tags</span></th></tr>" +
 		"<tr><th>Tag</th><th>Frequency</th><th>Relative Frequency</th></tr>";
@@ -174,10 +180,69 @@ function displayHTMLStats(stats) {
 	var topTables = "<table><tr><td>" + topTagTable + "</td><td>" + topStyleTable + "</td></tr></table>";
 
 	$("#resultsContainer").html(lineTable + htmlTable + cssTable + resourceTable + topTables);
-
 	showResultContainer();	
 	// Also display an error message if the stats object has signalled that one occurred
 	if (stats.error) {
 		showMessage("There was an error parsing the HTML file. As such, the displayed results may not be correct.");
 	}
+}
+
+// General language stats for all languages (excluding HTML)
+function displayProgLanguageStats(stats) {
+	showMessage("Generating display...");
+
+	var lineTable = generateTable("Lines", ["Code", "Comments", "Whitespace", "Total"],
+		[stats.codeLines, stats.commentLines, stats.whitespaceLines, stats.totalLines]);
+	var opsTable = generateTable("Basic Operations",
+		["+ / +=", "- / -=", "* / *=", "/ / /=", "^ / ^=", "% / %="], [
+		stats.basicOperations["+"] + " / " + stats.basicOperations["+="],
+		stats.basicOperations["-"] + " / " + stats.basicOperations["-="],
+		stats.basicOperations["*"] + " / " + stats.basicOperations["*="],
+		stats.basicOperations["/"] + " / " + stats.basicOperations["/="],
+		stats.basicOperations["^"] + " / " + stats.basicOperations["^="],
+		stats.basicOperations["%"] + " / " + stats.basicOperations["%="]]);
+	var compTable = generateTable("Comparison Operations",
+		["==", ">=", "<=", "<", ">", "&&", "||"], [
+		stats.basicOperations["=="], stats.basicOperations["<="],
+		stats.basicOperations[">="], stats.basicOperations["<"],
+		stats.basicOperations[">"], stats.basicOperations["&&"],
+		stats.basicOperations["||"]]);
+	var otherTable = generateTable("Other Operations",
+		["=", "&", "|", "~"], [stats.basicOperations["="], stats.basicOperations["&"],
+		stats.basicOperations["|"], stats.basicOperations["~"]]);
+	var ctrlStructTable = generateTable("Control Structures",
+		["if", "else", "switch", "case", "for", "while"],
+		[stats.controlStructures["if"], stats.controlStructures["else"],
+		stats.controlStructures["switch"], stats.controlStructures["case"],
+		stats.controlStructures["for"], stats.controlStructures["while"]]);
+	var symbolsTable = generateTable("Symbols",
+		["Functions", "Variables",],
+		[ stats.functionCount, stats.variableCount ]);
+
+	var topFunctions = stats.getMostUsedFunctions(5);
+	var topVariables = stats.getMostUsedVariables(5);
+
+	var topFunctionTable = "<table><tr><th colspan='2'><span class='top1 text_center'>Top 5 Functions</span></th></tr>" +
+		"<tr><th>Name</th><th>Frequency</th></tr>";
+	for (var i in topFunctions) {
+		topFunctionTable += "<tr><td>" + topFunctions[i][0] + "</td><td>" + topFunctions[i][1] + "</td></tr>";
+	}
+	topFunctionTable += "</table>";
+
+	var topVariableTable = "<table><tr><th colspan='2'><span class='top1 text_center'>Top 5 Variables</span></th></tr>" +
+		"<tr><th>Name</th><th>Frequency</th></tr>";
+	for (var i in topVariables) {
+		topVariableTable += "<tr><td>" + topVariables[i][0] + "</td><td>" + topVariables[i][1] + "</td></tr>";
+	}
+	topVariableTable += "</table>";
+
+	var topTables = "<table style='margin: 0 auto'><tr><td>" + topFunctionTable + "</td><td>" +
+		topVariableTable + "</td></tr></table>";
+
+	var complexity = "<div class='timeComplexity'><strong>Highest Quadratic Time Complexity Detected<br /><br />"
+		+ stats.getHighestComplexity() + "</strong></div>";
+
+	$("#resultsContainer").html(lineTable + opsTable + compTable + otherTable +
+		ctrlStructTable + symbolsTable + topTables + complexity);
+	showResultContainer();
 }
