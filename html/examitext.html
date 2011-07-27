@@ -120,12 +120,13 @@
 			break;
 		case 1:
 			TaskQueue.instance.add(new JSStatistics(text, showMessage));
-			//TaskQueue.instance.add(new FunctionWrapper(displayJSStats));
 			TaskQueue.instance.add(new FunctionWrapper(displayProgLanguageStats));
 			break;
 		case 2:
-			TaskQueue.instance.add(new JavaStatistics(text, showMessage));
-			TaskQueue.instance.add(new FunctionWrapper(displayJavaStats));
+			//TaskQueue.instance.add(new JavaStatistics(text, showMessage));
+			TaskQueue.instance.add(new CStyleStatistics(text, showMessage));
+			//TaskQueue.instance.add(new FunctionWrapper(displayJavaStats));
+			TaskQueue.instance.add(new FunctionWrapper(displayProgLanguageStats));
 			break;
 		case 3:
 			TaskQueue.instance.add(new CSStatistics(text, showMessage));

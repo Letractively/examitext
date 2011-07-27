@@ -31,20 +31,30 @@ Tokeniser.prototype.tokenise = function(text) {
 			if (this.ch == "=") {
 				this.storeCharacter();
 				this.nextCharacter();
-			}
 
-			this.addTokenAndClearBuffer();
-			checkEquals = false;
+				this.addTokenAndClearBuffer();
+				checkEquals = false;
+			// done so it doesn't give false positives for comment
+			} else if (this.previousCh == "/" && (this.ch == "/" || this.ch == "*")) {
+				// DO NOTHING!!!
+			} else {
+				this.addTokenAndClearBuffer();
+				checkEquals = false;	
+			}
 		}
 
 		// Skip past comments and whitespace
 		if (this.previousCh == "/" && this.ch == "/") { // line comment
+			// Clear the last token so the previous / is removed
+			this.charBuffer = this.charBuffer.substring(0, this.charBuffer.length - 1);
 			this.addTokenAndClearBuffer();
 			
 			while (this.ch != "\n") {
 				this.nextCharacter();
 			}
 		} else if (this.previousCh == "/" && this.ch == "*") { // block comment
+			// same as line comment
+			this.charBuffer = this.charBuffer.substring(0, this.charBuffer.length - 1);
 			this.addTokenAndClearBuffer();
 
 			while (this.previousCh != "*" || this.ch != "/") {
