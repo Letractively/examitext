@@ -459,6 +459,7 @@ CStyleStatistics.prototype = new LanguageStatistics();
 CStyleStatistics.prototype.constructor = CStyleStatistics;
 
 CStyleStatistics.prototype.validSymbolName = function(name) {
+	if (!name) return false;
 	var matches = name.match(/[a-zA-Z_][0-9a-zA-Z_]*/);
 	return (matches && matches.length == 1) ? true : false;
 }
@@ -530,19 +531,123 @@ CStyleStatistics.prototype.getStructCount = function() {
 	return this.structs.length;
 }
 
-// NOTE: This includes structs too
-CStyleStatistics.prototype.getMostUsedClass = function(amount) {
-	// Merges classes and structs into new list, then sorts it by uses
-	var classStructs = this.classes.concat(this.structs);
-	classStructs = classStructs.sort(function(a, b) {
-		return a.referenceCount < b.referenceCount ? 1 : a.referenceCount > b.referenceCount ? -1 : 0
-	});
-
-	return classStructs.slice(0, amount)
+CStyleStatistics.prototype.getTotalMethods = function() {
+	var total = 0;
+	for (var i = 0; (i < this.classes.length); ++i) {
+		total += this.classes[i].methods.length;
+	}
+	for (var i = 0; (i < this.structs.length); ++i) {
+		total += this.structs[i].methods.length;
+	}
+	return total;
 }
 
+CStyleStatistics.prototype.getTotalProperties = function() {
+	var total = 0;
+	for (var i = 0; (i < this.classes.length); ++i) {
+		total += this.classes[i].properties.length;
+	}
+	for (var i = 0; (i < this.structs.length); ++i) {
+		total += this.structs[i].properties.length;
+	}
+	return total;
+}
+
+// CStyleStatistics.prototype.getClassTree = function() {
+// 	var root = new ClassNode("Root", "");
+// 	 // contains the names of classes that have already been processed
+// 	var namesProcessed = [];
+
+// 	for (var i = 0; (i < this.classes.length); ++i) {
+// 		root.addChild(this.processClass(this.classes[i].name, root));
+// 	}
+
+// 	// Now recursively generates out each class
+// 	alert(printStuff(root));
+
+// 	return root;
+// }
+
+// function printStuff(node, depth) {
+// 	var depth = depth || 0;
+// 	var text = "";
+
+// 	for (var i = 0; (i < depth); ++i) {
+// 		text += "    ";
+// 	}
+// 	text += node.name + "\n";
+
+// 	for (var i = 0; (i < node.children.length); ++i) {
+// 		text += printStuff(node.children[i], depth + 1);
+// 	}
+
+// 	return text;
+// }
+
+// CStyleStatistics.prototype.processClass = function(name, parentNode) {
+// 	// First, finds the class
+// 	var cls = undefined;
+// 	for (var i = 0; (i < this.classes.length); ++i) {
+// 		if (name == this.classes[i].name) {
+// 			cls = this.classes[i];
+// 		}
+// 	}
+// 	if (!cls) return undefined;
+
+// 	// Generates a description for the class
+// 	var description = "TODO";
+
+// 	// Creates the actual node
+// 	var node = new ClassNode(cls.name, description);
+// 	// 
+// 	for (var i = 0; (i < cls.parentNames.length); ++i) {
+// 		var parent = this.processClass(cls.parentNames[i], parentNode);
+// 		if (parent) {
+// 			parentNode.addChild(parent);
+// 			parent.addChild(node);
+// 		}
+// 	}
+
+// 	return node;
+// }
+
+
+// /* Start of class ClassNode */
+
+// function ClassNode(name, description) {
+// 	this.name = name;
+// 	this.description = description;
+// 	this.children = [];
+// }
+
+// ClassNode.prototype.addChild = function(child) {
+// 	// Checks if a class with this name is already a child
+// 	// If so, do not add it to the list of children
+// 	for (var i = 0; (i < this.children.length); ++i) {
+// 		if (child.name == this.children[i].name) {
+// 			return;
+// 		}
+// 	}
+// 	this.children.push(child);
+// }
+
+// ClassNode.prototype.containsChild = function(child) {
+// 	for (var i = 0; (i < this.children.length); ++i) {
+// 		if (child.name == this.children[i].name) {
+// 			return true;;
+// 		} else {
+// 			if (this.children[i].containsChild(child.name)) {
+// 				return true;
+// 			}
+// 		}
+// 	}
+// 	return false;
+// }
+
+// /* End of class ClassNode */
+
 /* A method that is meant to be overloaded by child classes so
- * */
+ * each programming language can have its own OO parsing code. */
 CStyleStatistics.prototype.processOO = function() {
 	// EMPTY
 }
@@ -559,9 +664,6 @@ function Class(name) {
 	this.properties = [];
 	this.methods = [];
 	this.parentNames = [];
-
-	// How many times the class is referenced
-	this.referenceCount = 0;
 }
 
 Class.prototype.addProperty = function(name) {
@@ -611,8 +713,6 @@ JavaStatistics.prototype.processOO = function () {
 		}
 	}
 
-	alert(this.objectCreationCount);
-
 	for (var i = 0; (i < this.tokens.length); ++i) {
 		var token = this.tokens[i];
 
@@ -642,8 +742,6 @@ JavaStatistics.prototype.processOO = function () {
 					// break the loop if there's no no interfaces implemented
 					if (!(token && token == ",")) break;
 				}
-				//alert(this.tokens[i] + " " + this.tokens[i +
-				//1]);
 			}
 
 			// Method and property check

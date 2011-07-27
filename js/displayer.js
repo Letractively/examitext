@@ -1,23 +1,5 @@
 /* Functions for displaying the calculated statistics. */
 
-function generateTable(title, headings, data) {
-	var table = "<table style='margin: 0 auto'>";
-	if (title && title != "") {
-		table += "<tr><th colspan='" + headings.length + "'><span class='top1 text_center'>" + title + "</span.</th></tr><tr>";
-	}
-
-	table += "<tr>";
-	for (var i in headings) {
-		table += "<th>" + headings[i] + "</th>";
-	}
-	table += "</tr><tr>";
-	for (var i in data) {
-		table += "<td>" + data[i] + "</td>";
-	}
-	table += "</tr></table>";
-	return table;
-}
-
 function showMessage(message, showTime) { // NOTE: showTime is optional parameter
 	$("#messageContainer").html("<p class='textCenter red'><strong>" + message + "</strong></p>");
 	if (!$("#messageContainer").is(":visible")) {
@@ -38,6 +20,30 @@ function showResultContainer() {
 	$("#formContainer").hide("fast");
 
 	$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
+}
+
+
+function generateTable(title, headings, data) {
+	var table = "<table style='margin: 0 auto'>";
+	if (title && title != "") {
+		table += "<tr><th colspan='" + headings.length + "'><span class='top1 text_center'>" + title + "</span.</th></tr><tr>";
+	}
+
+	table += "<tr>";
+	for (var i in headings) {
+		table += "<th>" + headings[i] + "</th>";
+	}
+	table += "</tr><tr>";
+	for (var i in data) {
+		table += "<td>" + data[i] + "</td>";
+	}
+	table += "</tr></table>";
+	return table;
+}
+
+function generateComplexity(complexity) {
+	return "<div class='timeComplexity'><strong>Highest Quadratic Time Complexity Detected<br /><br />"
+		+ complexity + "</strong></div>";
 }
 
 
@@ -180,7 +186,7 @@ function displayHTMLStats(stats) {
 	var topTables = "<table><tr><td>" + topTagTable + "</td><td>" + topStyleTable + "</td></tr></table>";
 
 	$("#resultsContainer").html(lineTable + htmlTable + cssTable + resourceTable + topTables);
-	showResultContainer();	
+	showResultContainer();
 	// Also display an error message if the stats object has signalled that one occurred
 	if (stats.error) {
 		showMessage("There was an error parsing the HTML file. As such, the displayed results may not be correct.");
@@ -215,6 +221,13 @@ function displayProgLanguageStats(stats) {
 		[stats.controlStructures["if"], stats.controlStructures["else"],
 		stats.controlStructures["switch"], stats.controlStructures["case"],
 		stats.controlStructures["for"], stats.controlStructures["while"]]);
+
+	return (lineTable + opsTable + compTable + otherTable + ctrlStructTable);
+}
+
+function displayJSStats(stats) {
+	var generalStats = displayProgLanguageStats(stats);
+
 	var symbolsTable = generateTable("Symbols",
 		["Functions", "Variables",],
 		[ stats.functionCount, stats.variableCount ]);
@@ -237,12 +250,21 @@ function displayProgLanguageStats(stats) {
 	topVariableTable += "</table>";
 
 	var topTables = "<table style='margin: 0 auto'><tr><td>" + topFunctionTable + "</td><td>" +
-		topVariableTable + "</td></tr></table>";
+		topVariableTable + "</td></tr></table>";	
 
-	var complexity = "<div class='timeComplexity'><strong>Highest Quadratic Time Complexity Detected<br /><br />"
-		+ stats.getHighestComplexity() + "</strong></div>";
+	$("#resultsContainer").html(generalStats + symbolsTable + topTables + generateComplexity(stats.getHighestComplexity()));
+	showResultContainer();
+}
 
-	$("#resultsContainer").html(lineTable + opsTable + compTable + otherTable +
-		ctrlStructTable + symbolsTable + topTables + complexity);
+function displayJavaStats(stats) {
+	var generalStats = displayProgLanguageStats(stats);
+
+	var symbolsTable = generateTable("Symbols",
+		["Classes", "Total Methods", "Total Properties"],
+		[ stats.getClassCount(), stats.getTotalMethods(), stats.getTotalProperties() ]);
+
+	//var classTree = stats.getClassTree();
+
+	$("#resultsContainer").html(generalStats + symbolsTable + generateComplexity(stats.getHighestComplexity()));
 	showResultContainer();
 }
