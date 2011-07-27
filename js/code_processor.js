@@ -445,6 +445,12 @@ JSStatistics.prototype.run = function(value) {
 
 function CStyleStatistics(text, sendMessage) {
 	LanguageStatistics.call(this, text, sendMessage);
+
+	// Need to be filled by subclasses
+	this.classes = [];
+	this.structs = [];
+	this.objectCreationCount = 0; // calls to 'new'
+
 	this.cStage = 0;
 }
 
@@ -456,6 +462,7 @@ CStyleStatistics.prototype.validSymbolName = function(name) {
 	var matches = name.match(/[a-zA-Z_][0-9a-zA-Z_]*/);
 	return (matches && matches.length == 1) ? true : false;
 }
+
 CStyleStatistics.prototype.run = function(value) {
 	switch (this.cStage) {
 	case 0:
@@ -464,7 +471,7 @@ CStyleStatistics.prototype.run = function(value) {
 	case 1: // object processing
 		this.sendMessage("Detecting classes and methods...");
 
-		// TODO
+		this.processOO();
 
 		this.cStage += 1;
 		break;
@@ -515,103 +522,168 @@ CStyleStatistics.prototype.run = function(value) {
 	}
 }
 
+CStyleStatistics.prototype.getClassCount = function() {
+	return this.classes.length;
+}
+
+CStyleStatistics.prototype.getStructCount = function() {
+	return this.structs.length;
+}
+
+// NOTE: This includes structs too
+CStyleStatistics.prototype.getMostUsedClass = function(amount) {
+	// Merges classes and structs into new list, then sorts it by uses
+	var classStructs = this.classes.concat(this.structs);
+	classStructs = classStructs.sort(function(a, b) {
+		return a.referenceCount < b.referenceCount ? 1 : a.referenceCount > b.referenceCount ? -1 : 0
+	});
+
+	return classStructs.slice(0, amount)
+}
+
+/* A method that is meant to be overloaded by child classes so
+ * */
+CStyleStatistics.prototype.processOO = function() {
+	// EMPTY
+}
+
 
 /* ---------------------------------------------------------- */
-/*                         General Object                     */
+/*                     Object Oriented Stuff                  */
 /* ---------------------------------------------------------- */
 
 /* Start of class Class */
 
-// function Class(name) {
-// 	this.name = name;
-// 	this.properties = [];
-// 	this.methods = [];
-// 	this.children = [];
+function Class(name) {
+	this.name = name;
+	this.properties = [];
+	this.methods = [];
+	this.parentNames = [];
 
-// 	// How many times the class is referenced
-// 	this.referenceCount = 0;
-// }
+	// How many times the class is referenced
+	this.referenceCount = 0;
+}
 
-// Class.prototype.addProperty = function(name) {
-// 	this.properties.push(name);
-// }
+Class.prototype.addProperty = function(name) {
+	this.properties.push(name);
+}
 
-// Class.prototype.addMethod = function(name) {
-// 	this.methods.push(name);
-// }
+Class.prototype.addMethod = function(name) {
+	this.methods.push(name);
+}
 
-// Class.prototype.addChild = function(childClass) {
-// 	this.children.push(childClass);
-// }
+/* End of class Class */
 
-// /* End of class Class */
+/* Start of class Struct */
 
-// /* Start of class Struct */
+function Struct(name) {
+	this.name = name;
+	this.variables = [];
+	this.referenceCount = 0;
+}
 
-// function Struct(name) {
-// 	this.name = name;
-// 	this.variables = [];
-// 	this.referenceCount = 0;
-// }
+Struct.prototype.addVariable = function(name) {
+	this.variables.push(name);
+}
 
-// Struct.prototype.addVariable = function(name) {
-// 	this.variables.push(name);
-// }
-
-// /* End of class Struct */
-
-// /* Start of class ObjectStatistics */
-
-// function ObjectStatistics(text, sendMessage) {
-// 	CStyleStatistics.call(this, text, sendMessage);
-
-// 	this.text = text;
-// 	this.sendMessage = sendMessage;
-// 	this.stage = 0;
-
-// 	this.classes = [];
-// 	this.structs = [];
-
-// 	this.objectCreationCount = 0; // calls to 'new'
-
-// 	this.ooStage = 0;
-// }
-
-// // Inherits from C-Style statistics
-// ObjectStatistics.prototype = new CStyleStatistics();
-// ObjectStatistics.prototype.constructor = ObjectStatistics;
+/* End of class Struct */
 
 
-// // NOTE: generalStats is an instance of LanguageStatists, so
-// // it's required to have a LanguageStatistics instance running
-// // on the TaskQueue before this
-// ObjectStatistics.prototype.run = function(value) {
-// 	switch (this.ooStage) {
-// 	case 0:
-// 		CStyleStatistics,call(this, value);
-// 	case 2:
-// 		this.ooStage += 1;
-// 		retunr this;
-// 	}
-// }
 
-// ObjectStatistics.prototype.getClassCount = function() {
-// 	return this.classes.length;
-// }
+/* ---------------------------------------------------------- */
+/*                             Java                           */
+/* ---------------------------------------------------------- */
 
-// ObjectStatistics.prototype.getStructCount = function() {
-// 	return this.structs.length;
-// }
+function JavaStatistics(text, sendMessage) {
+	CStyleStatistics.call(this, text, sendMessage);
+}
 
-// // NOTE: This includes structs too
-// ObjectStatistics.prototype.getMostUsedClass = function(amount) {
-// 	// Merges classes and structs into new list, then sorts it by uses
-// 	var classStructs = this.classes.concat(this.structs);
-// 	classStructs = classStructs.sort(function(a, b) {
-// 		return a.referenceCount < b.referenceCount ? 1 : a.referenceCount > b.referenceCount ? -1 : 0
-// 	});
+JavaStatistics.prototype = new CStyleStatistics();
+JavaStatistics.prototype.constructor = JavaStatistics;
 
-// 	return classStructs.slice(0, amount)
-// }
+JavaStatistics.prototype.processOO = function () {
 
-// /* End of class ObjectStatistics */
+	// Before scanning for classes, search for any instances of 'new'
+	// to get object creation count
+	for (var i = 0; (i < this.tokens.length); ++i) {
+		if (this.tokens[i] == "new") {
+			this.objectCreationCount += 1;
+		}
+	}
+
+	alert(this.objectCreationCount);
+
+	for (var i = 0; (i < this.tokens.length); ++i) {
+		var token = this.tokens[i];
+
+		if (token == "class" || token == "interface") {
+			var startIndex = i;
+
+			// Gets class name and creates class object
+			var cls = undefined;
+			var name = this.tokens[++i];
+			if (name) cls = new Class(name);
+			else continue;
+
+			// Checks if class has any superclasses
+			token = this.tokens[++i];
+		
+			if (token == "extends") {
+				cls.parentNames.push(this.tokens[++i]);
+				i += 1; // skip to next token (either implements or {)
+			}
+
+			// Interface check
+			token = this.tokens[i];
+			if (token == "implements") {
+				while (true) {
+					cls.parentNames.push(this.tokens[++i]);
+					token = this.tokens[++i];
+					// break the loop if there's no no interfaces implemented
+					if (!(token && token == ",")) break;
+				}
+				//alert(this.tokens[i] + " " + this.tokens[i +
+				//1]);
+			}
+
+			// Method and property check
+			var depth = 0;
+			do {
+				token = this.tokens[i];
+				i += 1;
+
+				if (token == "{") {
+					depth += 1;
+				} else if (token == "}") {
+					depth -= 1;
+
+				// If we're NOT in a method body, check for properties and methods
+				} else if (depth < 2) {
+					if (this.validSymbolName(token)) {
+						var nextToken = this.tokens[i];
+
+						if (nextToken && this.validSymbolName(nextToken)) {
+							var tokenAfterThat = this.tokens[i + 1];
+
+							if (tokenAfterThat) {
+								if (tokenAfterThat == "=" || tokenAfterThat == ";") {
+									cls.addProperty(nextToken);
+								} else if (tokenAfterThat == "(") {
+									cls.addMethod(nextToken);
+								}
+							}
+						}
+					}
+
+				}
+			} while (depth > 0);
+
+			// remove class tokens
+			this.tokens.splice(startIndex, i - startIndex);
+			i = startIndex - 1;
+
+			// Finally, add the class to the list
+			this.classes.push(cls);
+		}
+	}
+}
