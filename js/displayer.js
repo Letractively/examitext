@@ -202,7 +202,7 @@ function displayProgLanguageStats(stats) {
 		stats.basicOperations["^"] + " / " + stats.basicOperations["^="],
 		stats.basicOperations["%"] + " / " + stats.basicOperations["%="]]);
 	var compTable = generateTable("Comparison Operations",
-		["==", ">=", "<=", "<", ">", "&&", "||"], [
+		["==", "<=", ">=", "<", ">", "&&", "||"], [
 		stats.basicOperations["=="], stats.basicOperations["<="],
 		stats.basicOperations[">="], stats.basicOperations["<"],
 		stats.basicOperations[">"], stats.basicOperations["&&"],

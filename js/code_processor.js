@@ -269,12 +269,16 @@ LanguageStatistics.prototype.run = function(value) {
 
 		// Tries to find out how many lines are taken up by comments
 		// Regex from http://ostermiller.org/findcomment.html
-		var comments = this.text.match(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*)/);
-		if (comments != null) {
-			for (var i = 0; (i < comments.length); ++i) {
-				if (!comments[i]) continue;
-				this.commentLines += comments[i].split("\n").length;
+		var blockComments = this.text.match(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)/);
+		var lineComments = this.text.match(/(\/\/.*)/);
+		if (blockComments != null) {
+			for (var i = 0; (i < blockComments.length); ++i) {
+				if (!blockComments[i]) continue;
+				this.commentLines += blockComments[i].split(/\n/).length - 1;
 			}
+		}
+		if (lineComments != null) {
+			this.commentLines += lineComments.length - 1;
 		}
 
 		this.codeLines = this.totalLines - this.whitespaceLines - this.commentLines;
@@ -284,11 +288,8 @@ LanguageStatistics.prototype.run = function(value) {
 	case 1: // tokenising
 		this.sendMessage("Tokenising source code...");
 
-		// Removes comments from the text
-		var filteredText = this.text.replace(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*)/, "");
-		// Tokenises everything, gets rid of all whitespace except for singe spaces,
-		// then splits the result into single word/symbol tokens
-		this.tokens = filteredText.replace(/\s+/g, " ").split(" ");
+		var tokeniser = new Tokeniser();
+		this.tokens = tokeniser.tokenise(this.text);
 		
 		this.stage += 1;
 		break;
@@ -387,36 +388,27 @@ JSStatistics.prototype.run = function(value) {
 				this.variables[this.tokens[i + 1]] = 0;
 				this.variableCount += 1;
 				i += 1;
-			} else {
-				var sub = token.substring(0, 9);
-
-				if (sub == "function(") { // gone first! important!
-					var previousToken = this.tokens[i - 1];
-
-					if (previousToken && previousToken == "=") {
-						var tokenBeforeThat = this.tokens[i - 2];
-						if (tokenBeforeThat == "") alert("..");
-						if (tokenBeforeThat) {
-							this.functions[tokenBeforeThat] = 0;
-							this.functionCount += 1;
+			} else if (token == "function") {
+				var nextToken = this.tokens[i + 1];
+				if (nextToken) {
+					if (nextToken == "(") { // argument list already started, go back!
+						var previousToken = this.tokens[i - 1];
+						if (previousToken && previousToken == "=") {
+							var tokenBeforeThat = this.tokens[i - 2];
+							if (tokenBeforeThat) {
+								this.functions[tokenBeforeThat] = 0;
+								this.functionCount += 1;
+							} else {
+								this.functions["anonymous_function"] = 0;
+								this.functionCount += 1;
+							}
 						} else {
 							this.functions["anonymous_function"] = 0;
 							this.functionCount += 1;
 						}
 					} else {
-						this.functions["anonymous_function"] = 0;
+						this.functions[nextToken] = 0;
 						this.functionCount += 1;
-					}
-				} else if (sub == "function") {
-					var nextToken = this.tokens[i + 1];
-
-					if (nextToken) { 
-						var funcName = nextToken.split("(")[0];
-						if (funcName.length > 0) {
-							this.functions[funcName] = 0;
-							this.functionCount += 1;
-							i += 1;
-						}
 					}
 				}
 			}
