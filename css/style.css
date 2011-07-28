@@ -16,6 +16,15 @@ body table td { padding: 5px; }
 textarea { resize: none; width:100%; }
 /*.textwrapper { border:1px solid #999; margin:5px 0; padding:3px; }*/
 
+ul {
+	font-size: 14px; font-weight: bold; text-indent: 0px;
+	list-style-position: outside; list-style-type: square;
+	color: #48F;
+	padding: 3px 16px;
+}
+/* Here so the text is a different font style to the bullet point */
+li span { color: #000; font-weight: normal; }
+
 
 /* Main container. */
 #container {
@@ -31,7 +40,7 @@ textarea { resize: none; width:100%; }
 
 /* Header */
 #header {
-	width: 100%;
+	width: 800px;
 	height: 100px;
 	background-color: #48F;
 }
@@ -48,6 +57,7 @@ textarea { resize: none; width:100%; }
 
 /* Footer */
 #footer {
+	width: 800px;
 	background-color: #48F;
 	padding: 10px;
 
@@ -90,7 +100,9 @@ textarea { resize: none; width:100%; }
 #resultsContainer td { text-align: center;}
 
 .topTable table { float: left; width: 300px; }
-.timeComplexity { float: bottom; margin: 0 auto; width: 400px; padding: 20px; text-align: center; font-size: 14px; }
+.header { float: bottom; width: 400px; padding: 20px 0px; font-size: 14px; font-weight: bold; color: #48F;
+	margin: 0 auto; text-align: center; }
+.classHierarchy { padding: 10px 10px; font-size: 16px; font-weight: bold; color: #48F; float: bottom; }
 
 #areaGraphContainer { padding-top: 20px; width: 760px; height: 300px; }
 #pieChartContainer { width: 760px; height: 300px; }

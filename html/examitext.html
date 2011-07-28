@@ -32,22 +32,6 @@
 
 	<script type="text/javascript" src="../js/displayer.js"></script>
 	<script type="text/javascript">
-
-	/* Useful for dynamically placing elements at the centre of the screen. */
-	jQuery.fn.center_x = function() {
-		this.css("position","absolute");
-		this.css("left", (($(window).width() - this.outerWidth()) / 2) + $(window).scrollLeft() + "px");
-	}
-	jQuery.fn.center_y = function() {
-		this.css("position","absolute");
-		this.css("top", (($(window).height() - this.outerHeight()) / 2) + $(window).scrollTop() + "px");
-	}
-	jQuery.fn.center = function() {
-		this.center_x();
-		this.center_y();
-	    return this;
-	}
-
 	// Maps the index of the selected language to its name
 	var indexToLanguage = {
 		0 : "english",
@@ -284,7 +268,7 @@
 	<!-- We center the container here since it's been populated with all
 	     its content by this point. -->
 	<script type="text/javascript">
-		$("#container").center();
+		$("#container").center_screen();
 		$("#messageContainer").hide();
 		$("#options1").hide();
 	</script>

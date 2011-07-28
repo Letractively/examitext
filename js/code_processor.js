@@ -553,98 +553,86 @@ CStyleStatistics.prototype.getTotalProperties = function() {
 	return total;
 }
 
-// CStyleStatistics.prototype.getClassTree = function() {
-// 	var root = new ClassNode("Root", "");
-// 	 // contains the names of classes that have already been processed
-// 	var namesProcessed = [];
 
-// 	for (var i = 0; (i < this.classes.length); ++i) {
-// 		root.addChild(this.processClass(this.classes[i].name, root));
-// 	}
+function objToString(obj) {
+	var text = "";
+	for (var prop in obj) {
+		obj += obj[prop] + ", ";
+	}
+	return text;
+}
 
-// 	// Now recursively generates out each class
-// 	alert(printStuff(root));
+/* Returns a tree which provides a sorted, top down view of
+ * the class/struct/interface inheritence hierarchy.
+ * Returns the root node, which is an instance of ClassNode */
+CStyleStatistics.prototype.getClassTree = function() {
+	// Key is name, value is ClassNode instance
+	var nodes = {};
+	// Fills the nodes associative array with all the classes at the rot
+	for (var i = 0; (i < this.classes.length); ++i) {
+		var cls = this.classes[i];
+		var name = cls.name;
 
-// 	return root;
-// }
+		// Generates description
+		var description = "Unique Methods: ";
+		for (var j = 0; (j < cls.methods.length); ++j) {
+			if (j == cls.methods.length - 1) // if last element
+				description += cls.methods[j];
+			else
+				description += cls.methods[j] + ", ";
+		}
+		description += "\nUnique Properties: ";
+		for (var j = 0; (j < cls.properties.length); ++j) {
+			if (j == cls.properties.length - 1) // if last element
+				description += cls.properties[j];
+			else
+				description += cls.properties[j] + ", ";
+		}
 
-// function printStuff(node, depth) {
-// 	var depth = depth || 0;
-// 	var text = "";
+		nodes[name] = new ClassNode(name, description);
+	}
 
-// 	for (var i = 0; (i < depth); ++i) {
-// 		text += "    ";
-// 	}
-// 	text += node.name + "\n";
+	// Now sorts the tree based on inheritence hierarchy
+	for (var name in nodes) {
+		var node = nodes[name];
 
-// 	for (var i = 0; (i < node.children.length); ++i) {
-// 		text += printStuff(node.children[i], depth + 1);
-// 	}
+		// Gets parent names of the node
+		var cls = undefined;
+		for (var i = 0; (i < this.classes.length); ++i) {
+			if (name == this.classes[i].name) {
+				cls = this.classes[i];
+			}
+		}
+		if (cls == undefined) continue;
 
-// 	return text;
-// }
+		var parentNames = cls.parentNames;
 
-// CStyleStatistics.prototype.processClass = function(name, parentNode) {
-// 	// First, finds the class
-// 	var cls = undefined;
-// 	for (var i = 0; (i < this.classes.length); ++i) {
-// 		if (name == this.classes[i].name) {
-// 			cls = this.classes[i];
-// 		}
-// 	}
-// 	if (!cls) return undefined;
+		var parentFound = false;
+		for (var i = 0; (i < parentNames.length); ++i) {	
+			var parent = this.findNode(nodes, parentNames[i]);
 
-// 	// Generates a description for the class
-// 	var description = "TODO";
+			if (parent) {
+				parent.addChild(node);
+				parentFound = true;
+			} // don't delete node from root if parent not found
+		}
 
-// 	// Creates the actual node
-// 	var node = new ClassNode(cls.name, description);
-// 	// 
-// 	for (var i = 0; (i < cls.parentNames.length); ++i) {
-// 		var parent = this.processClass(cls.parentNames[i], parentNode);
-// 		if (parent) {
-// 			parentNode.addChild(parent);
-// 			parent.addChild(node);
-// 		}
-// 	}
+		if (parentFound) delete nodes[name];
+	}
 
-// 	return node;
-// }
+	var root = new ClassNode("Root", "Root of hierarchy.");
+	root.children = nodes;
+	return root;
+}
 
-
-// /* Start of class ClassNode */
-
-// function ClassNode(name, description) {
-// 	this.name = name;
-// 	this.description = description;
-// 	this.children = [];
-// }
-
-// ClassNode.prototype.addChild = function(child) {
-// 	// Checks if a class with this name is already a child
-// 	// If so, do not add it to the list of children
-// 	for (var i = 0; (i < this.children.length); ++i) {
-// 		if (child.name == this.children[i].name) {
-// 			return;
-// 		}
-// 	}
-// 	this.children.push(child);
-// }
-
-// ClassNode.prototype.containsChild = function(child) {
-// 	for (var i = 0; (i < this.children.length); ++i) {
-// 		if (child.name == this.children[i].name) {
-// 			return true;;
-// 		} else {
-// 			if (this.children[i].containsChild(child.name)) {
-// 				return true;
-// 			}
-// 		}
-// 	}
-// 	return false;
-// }
-
-// /* End of class ClassNode */
+CStyleStatistics.prototype.findNode = function(nodes, nodeName) {
+	for (var name in nodes) {
+		if (nodeName == name) return nodes[name];
+		var n = this.findNode(nodes[name].children, nodeName);
+		if (n != null) return n;
+	}
+	return null;
+}
 
 /* A method that is meant to be overloaded by child classes so
  * each programming language can have its own OO parsing code. */
@@ -690,6 +678,23 @@ Struct.prototype.addVariable = function(name) {
 
 /* End of class Struct */
 
+/* Start of class ClassNode */
+
+function ClassNode(name, description) {
+	this.name = name;
+	this.description = description;
+	this.children = {};
+}
+
+ClassNode.prototype.addChild = function(child) {
+	// Checks if a class with this name is already a child
+	// If so, do not add it to the list of children
+	if (!(child.name in this.children)) {
+		this.children[child.name] = child;
+	}
+}
+
+/* End of class ClassNode */
 
 
 /* ---------------------------------------------------------- */
@@ -946,7 +951,6 @@ CPPStatistics.prototype.processOO = function () {
 							var tokenAfterThat = this.tokens[i + 1];
 
 							if (tokenAfterThat) {
-								// TODO: check more 
 								if (tokenAfterThat == "=" || tokenAfterThat == ";") {
 									cls.addProperty(nextToken);
 								} else if (tokenAfterThat == "(") {

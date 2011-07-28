@@ -42,10 +42,32 @@ function generateTable(title, headings, data) {
 }
 
 function generateComplexity(complexity) {
-	return "<div class='timeComplexity'><strong>Highest Quadratic Time Complexity Detected<br /><br />"
-		+ complexity + "</strong></div>";
+	return "<div class='header center'>Highest Quadratic Time Complexity Detected<br /><br />" +
+		"<span style='color: #000; font-weight: normal;'>" + complexity + "</span></span></div>";
 }
 
+/* Generates a hierarchial view of the classes and their inheritences.
+ * 'nodes' is an instance of ClassNode, which represents the root of
+ * the class hierarchy.
+ * 'depth' is an optional parameter that is 0 when not provided. Only the
+ * first parameter is to be provided on the initial call of this function. */
+function generateClassHierarchy(node, depth) {
+	var depth = depth || 0;
+	var markup = "";
+
+	if (depth == 0) markup += "<ul>";
+	markup += "<li class='hierarchyNode' title='" + node.description + "'><span>" + node.name + "<span></li>";
+
+	markup += "<ul>";
+	for (var name in node.children) {
+		markup += generateClassHierarchy(node.children[name], depth + 1)
+	}
+	markup += "</ul>";
+
+	if (depth == 0) markup += "</ul>";
+
+	return markup;
+}
 
 function displayDocumentStats(stats) {
 	showMessage("Generating display...");
@@ -264,10 +286,11 @@ function displayJavaStats(stats) {
 		[ stats.getClassCount(), stats.getTotalMethods(), stats.getTotalProperties() ]);
 	var miscTable = generateTable("Miscellaneous", ["New Allocations"], [stats.objectCreationCount]);
 
-	//var classTree = stats.getClassTree();
+	var classTree = "<div class='classHierarchy' style='padding-left: 10px'>Class Hierarchy</div>" + 
+		"<div style='position: relative; left: 30px;'>" + generateClassHierarchy(stats.getClassTree()) + "</div>";
 
 	$("#resultsContainer").html(generalStats + symbolsTable + miscTable +
-		generateComplexity(stats.getHighestComplexity()));
+		generateComplexity(stats.getHighestComplexity()) + classTree);
 	showResultContainer();
 }
 
@@ -279,8 +302,11 @@ function displayCSStats(stats) {
 		[ stats.getClassCount(), stats.getTotalMethods(), stats.getTotalProperties() ]);
 	var miscTable = generateTable("Miscellaneous", ["'New' Allocations"], [stats.objectCreationCount]);
 
+	var classTree = "<div class='classHierarchy' style='padding-left: 10px'>Class Hierarchy</div>" + 
+		"<div style='position: relative; left: 30px;'>" + generateClassHierarchy(stats.getClassTree()) + "</div>";
+
 	$("#resultsContainer").html(generalStats + symbolsTable + miscTable + 
-		generateComplexity(stats.getHighestComplexity()));
+		generateComplexity(stats.getHighestComplexity()) + classTree);
 	showResultContainer();
 }
 
@@ -293,7 +319,27 @@ function displayCPPStats(stats) {
 		stats.getTotalProperties() ]);
 	var miscTable = generateTable("Miscellaneous", ["'New' Allocations"], [stats.objectCreationCount]);
 
+	var classTree = "<div class='classHierarchy'>Class Hierarchy</div>" + 
+		"<div style='position: relative; left: 30px;'>" + generateClassHierarchy(stats.getClassTree()) + "</div>";
+
 	$("#resultsContainer").html(generalStats + symbolsTable + miscTable +
-		generateComplexity(stats.getHighestComplexity()));
+		generateComplexity(stats.getHighestComplexity()) + classTree);
 	showResultContainer();
+}
+
+
+
+/* Useful for dynamically placing elements at the centre of the screen. */
+jQuery.fn.center_screen_x = function() {
+	this.css("position","absolute");
+	this.css("left", (($(window).width() - this.outerWidth()) / 2) + $(window).scrollLeft() + "px");
+}
+jQuery.fn.center_screen_y = function() {
+	this.css("position","absolute");
+	this.css("top", (($(window).height() - this.outerHeight()) / 2) + $(window).scrollTop() + "px");
+}
+jQuery.fn.center_screen = function() {
+	this.center_screen_x();
+	this.center_screen_y();
+    return this;
 }
