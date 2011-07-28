@@ -25,24 +25,13 @@ ul {
 /* Here so the text is a different font style to the bullet point */
 li span { color: #000; font-weight: normal; }
 
-
-/* Main container. */
-#container {
-	position: relative;
-	top: 200px;
-
-	background-color: white;
-	width: 800px;
-	margin: 0 auto;
-
-}
-
-
 /* Header */
 #header {
 	width: 800px;
+	margin: 0 auto;
+
 	height: 100px;
-	background-color: #48F;
+	background: url(../images/header_back.png) no-repeat;
 }
 #header img {
 	text-align: center;
@@ -52,19 +41,22 @@ li span { color: #000; font-weight: normal; }
 
 
 /* Content */
-#content { }
+#content {
+	width: 800px;
+	margin: 0 auto;
+
+	background-color: #FFF;
+}
 
 
 /* Footer */
 #footer {
 	width: 800px;
-	background-color: #48F;
-	padding: 10px;
+	height: 25px;
+	margin: 0 auto;
 
-	-moz-border-radius: 0px 0px 20px 20px;
-	-webkit-border-radius: 0px 0px 20px 20px;
-	-khtml-border-radius: 0px 0px 20px 20px;
-	border-radius: 0px 0px 20px 20px;
+	background-color: #48F;
+	background: url(../images/footer_back.png) no-repeat;
 }
 #footer p { text-align: center; font-weight: bold; color: #FFF; }
 
@@ -106,31 +98,6 @@ li span { color: #000; font-weight: normal; }
 
 #areaGraphContainer { padding-top: 20px; width: 760px; height: 300px; }
 #pieChartContainer { width: 760px; height: 300px; }
-
-
-/* Other classes */
-.rounded_corners_all {
-	-moz-border-radius: 20px;
-	-webkit-border-radius: 20px;
-	-khtml-border-radius: 20px;
-	border-radius: 20px;
-	behavior: url(../js/PIE.htc);
-}
-.rounded_corners_top {
-	-moz-border-radius: 20px 20px 0px 0px;
-	-webkit-border-radius: 20px 20px 0px 0px;
-	-khtml-border-radius: 20px 20px 0px 0px;
-	border-radius: 20px 20px 0px 0px;
-	behavior: url(../js/PIE.htc);
-}
-.rounded_corners_bottom {
-	-moz-border-radius: 0px 0px 20px 20px;
-	-webkit-border-radius: 0px 00px 20px 20px;
-	-khtml-border-radius: 0px 0px 20px 20px;
-	border-radius: 0px 0px 20px 20px;
-	behavior: url(../js/PIE.htc);
-}
-
 
 /* Generated using http://www.cssbuttongenerator.com/ */
 .button {
