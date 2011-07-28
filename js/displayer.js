@@ -260,10 +260,33 @@ function displayJavaStats(stats) {
 	var generalStats = displayProgLanguageStats(stats);
 
 	var symbolsTable = generateTable("Symbols",
-		["Classes", "Total Methods", "Total Properties"],
+		["Classes/Interfaces", "Total Methods", "Total Properties"],
 		[ stats.getClassCount(), stats.getTotalMethods(), stats.getTotalProperties() ]);
 
 	//var classTree = stats.getClassTree();
+
+	$("#resultsContainer").html(generalStats + symbolsTable + generateComplexity(stats.getHighestComplexity()));
+	showResultContainer();
+}
+
+function displayCSStats(stats) {
+	var generalStats = displayProgLanguageStats(stats);
+
+	var symbolsTable = generateTable("Symbols",
+		["Classes/Structs/Interfaces", "Total Methods", "Total Properties"],
+		[ stats.getClassCount(), stats.getTotalMethods(), stats.getTotalProperties() ]);
+
+	$("#resultsContainer").html(generalStats + symbolsTable + generateComplexity(stats.getHighestComplexity()));
+	showResultContainer();
+}
+
+function displayCPPStats(stats) {
+	var generalStats = displayProgLanguageStats(stats);
+
+	var symbolsTable = generateTable("Symbols",
+		["Function/Function Calls", "Global/Local Variables", "Classes/Structs", "Total Methods", "Total Properties"],
+		[ stats.functionCount, stats.variableCount, stats.getClassCount(), stats.getTotalMethods(),
+		stats.getTotalProperties() ]);
 
 	$("#resultsContainer").html(generalStats + symbolsTable + generateComplexity(stats.getHighestComplexity()));
 	showResultContainer();

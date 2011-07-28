@@ -739,7 +739,7 @@ JavaStatistics.prototype.processOO = function () {
 				while (true) {
 					cls.parentNames.push(this.tokens[++i]);
 					token = this.tokens[++i];
-					// break the loop if there's no no interfaces implemented
+					// break the loop if there's no more interfaces implemented
 					if (!(token && token == ",")) break;
 				}
 			}
@@ -764,6 +764,189 @@ JavaStatistics.prototype.processOO = function () {
 							var tokenAfterThat = this.tokens[i + 1];
 
 							if (tokenAfterThat) {
+								if (tokenAfterThat == "=" || tokenAfterThat == ";") {
+									cls.addProperty(nextToken);
+								} else if (tokenAfterThat == "(") {
+									cls.addMethod(nextToken);
+								}
+							}
+						}
+					}
+
+				}
+			} while (depth > 0);
+
+			// remove class tokens
+			this.tokens.splice(startIndex, i - startIndex);
+			i = startIndex - 1;
+
+			// Finally, add the class to the list
+			this.classes.push(cls);
+		}
+	}
+}
+
+
+
+/* ---------------------------------------------------------- */
+/*                              C#                            */
+/* ---------------------------------------------------------- */
+
+function CSStatistics(text, sendMessage) {
+	CStyleStatistics.call(this, text, sendMessage);
+}
+
+CSStatistics.prototype = new CStyleStatistics();
+CSStatistics.prototype.constructor = CSStatistics;
+
+CSStatistics.prototype.processOO = function () {
+
+	// Before scanning for classes, search for any instances of 'new'
+	// to get object creation count
+	for (var i = 0; (i < this.tokens.length); ++i) {
+		if (this.tokens[i] == "new") {
+			this.objectCreationCount += 1;
+		}
+	}
+
+	for (var i = 0; (i < this.tokens.length); ++i) {
+		var token = this.tokens[i];
+
+		if (token == "class" || token == "interface" || token == "struct") {
+			var startIndex = i;
+
+			// Gets class name and creates class object
+			var cls = undefined;
+			var name = this.tokens[++i];
+			if (name) cls = new Class(name);
+			else continue;
+
+			// Superclass AND I nterface check
+			token = this.tokens[++i];
+			if (token == ":") {
+				while (true) {
+					cls.parentNames.push(this.tokens[++i]);
+					token = this.tokens[++i];
+					// break the loop if there's no more interfaces implemented
+					if (!(token && token == ",")) break;
+				}
+			}
+
+			// Method and property check
+			var depth = 0;
+			do {
+				token = this.tokens[i];
+				i += 1;
+
+				if (token == "{") {
+					depth += 1;
+				} else if (token == "}") {
+					depth -= 1;
+
+				// If we're NOT in a method body, check for properties and methods
+				} else if (depth < 2) {
+					if (this.validSymbolName(token)) {
+						var nextToken = this.tokens[i];
+
+						if (nextToken && this.validSymbolName(nextToken)) {
+							var tokenAfterThat = this.tokens[i + 1];
+
+							if (tokenAfterThat) {
+								if (tokenAfterThat == "=" || tokenAfterThat == ";") {
+									cls.addProperty(nextToken);
+								} else if (tokenAfterThat == "(") {
+									cls.addMethod(nextToken);
+								}
+							}
+						}
+					}
+
+				}
+			} while (depth > 0);
+
+			// remove class tokens
+			this.tokens.splice(startIndex, i - startIndex);
+			i = startIndex - 1;
+
+			// Finally, add the class to the list
+			this.classes.push(cls);
+		}
+	}
+}
+
+
+
+/* ---------------------------------------------------------- */
+/*                              C++                           */
+/* ---------------------------------------------------------- */
+
+function CPPStatistics(text, sendMessage) {
+	CStyleStatistics.call(this, text, sendMessage);
+}
+
+CPPStatistics.prototype = new CStyleStatistics();
+CPPStatistics.prototype.constructor = CPPStatistics;
+
+CPPStatistics.prototype.processOO = function () {
+
+	// Before scanning for classes, search for any instances of 'new'
+	// to get object creation count
+	for (var i = 0; (i < this.tokens.length); ++i) {
+		if (this.tokens[i] == "new") {
+			this.objectCreationCount += 1;
+		}
+	}
+
+	for (var i = 0; (i < this.tokens.length); ++i) {
+		var token = this.tokens[i];
+
+		if (token == "class" || token == "struct") {
+			var startIndex = i;
+
+			// Gets class name and creates class object
+			var cls = undefined;
+			var name = this.tokens[++i];
+			if (name) cls = new Class(name);
+			else continue;
+
+			// Superclass AND I nterface check
+			token = this.tokens[++i];
+			if (token == ":") {
+				while (true) {
+					// First, check if class name is an access specifier. If so, ignore it
+					token = this.tokens[++i];
+					if (token == "public" || token == "protected" || token == "private") {
+						token = this.tokens[++i]; // move onto next token
+					}
+
+					cls.parentNames.push(token);
+					token = this.tokens[++i];
+					// break the loop if there's no more superclasses implemented
+					if (!(token && token == ",")) break;
+				}
+			}
+
+			// Method and property check
+			var depth = 0;
+			do {
+				token = this.tokens[i];
+				i += 1;
+
+				if (token == "{") {
+					depth += 1;
+				} else if (token == "}") {
+					depth -= 1;
+
+				// If we're NOT in a method body, check for properties and methods
+				} else if (depth < 2) {
+					if (this.validSymbolName(token)) {
+						var nextToken = this.tokens[i];
+
+						if (nextToken && this.validSymbolName(nextToken)) {
+							var tokenAfterThat = this.tokens[i + 1];
+
+							if (tokenAfterThat) {
+								// TODO: check more 
 								if (tokenAfterThat == "=" || tokenAfterThat == ";") {
 									cls.addProperty(nextToken);
 								} else if (tokenAfterThat == "(") {
