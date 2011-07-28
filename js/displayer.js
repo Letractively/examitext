@@ -262,10 +262,12 @@ function displayJavaStats(stats) {
 	var symbolsTable = generateTable("Symbols",
 		["Classes/Interfaces", "Total Methods", "Total Properties"],
 		[ stats.getClassCount(), stats.getTotalMethods(), stats.getTotalProperties() ]);
+	var miscTable = generateTable("Miscellaneous", ["New Allocations"], [stats.objectCreationCount]);
 
 	//var classTree = stats.getClassTree();
 
-	$("#resultsContainer").html(generalStats + symbolsTable + generateComplexity(stats.getHighestComplexity()));
+	$("#resultsContainer").html(generalStats + symbolsTable + miscTable +
+		generateComplexity(stats.getHighestComplexity()));
 	showResultContainer();
 }
 
@@ -275,8 +277,10 @@ function displayCSStats(stats) {
 	var symbolsTable = generateTable("Symbols",
 		["Classes/Structs/Interfaces", "Total Methods", "Total Properties"],
 		[ stats.getClassCount(), stats.getTotalMethods(), stats.getTotalProperties() ]);
+	var miscTable = generateTable("Miscellaneous", ["'New' Allocations"], [stats.objectCreationCount]);
 
-	$("#resultsContainer").html(generalStats + symbolsTable + generateComplexity(stats.getHighestComplexity()));
+	$("#resultsContainer").html(generalStats + symbolsTable + miscTable + 
+		generateComplexity(stats.getHighestComplexity()));
 	showResultContainer();
 }
 
@@ -287,7 +291,9 @@ function displayCPPStats(stats) {
 		["Function/Function Calls", "Global/Local Variables", "Classes/Structs", "Total Methods", "Total Properties"],
 		[ stats.functionCount, stats.variableCount, stats.getClassCount(), stats.getTotalMethods(),
 		stats.getTotalProperties() ]);
+	var miscTable = generateTable("Miscellaneous", ["'New' Allocations"], [stats.objectCreationCount]);
 
-	$("#resultsContainer").html(generalStats + symbolsTable + generateComplexity(stats.getHighestComplexity()));
+	$("#resultsContainer").html(generalStats + symbolsTable + miscTable +
+		generateComplexity(stats.getHighestComplexity()));
 	showResultContainer();
 }
