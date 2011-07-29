@@ -31,147 +31,8 @@
 	<script type="text/javascript" src="../js/code_processor.js"></script>
 
 	<script type="text/javascript" src="../js/displayer.js"></script>
-	<script type="text/javascript">
-	// Maps the index of the selected language to its name
-	var indexToLanguage = {
-		0 : "english",
-		1 : "french",
-		2 : "german",
-		3 : "italian",
-		4 : "spanish",
-		5 : "portuguese",
-		6 : "swedish",
-		7 : "finnish"
-	}
-	// Global variables for this page, store what feature and language have been selected
-	var selectedFeature = 0
-	var selectedLanguage = 0;
-	var selectedProgLanguage = 0;
-
-	/* Retrives text from the raw text area. */
-	function getText() {
-		var rawText = document.forms("logForm").elements["rawText"];
-		return rawText.value;
-	}
-
-	/* Called when the analyse button is clicked. */
-	function analyse() {
-		// Get source text
-		var text = getText();
-		if (text != undefined && text != "") {
-			if (!TaskQueue.instance.running) {
-				switch (selectedFeature) {
-					case 0: analyseDocument(text); break;
-					case 1: analyseChatlog(text); break;
-					case 2: analyseSourceFile(text); break;
-				}
-				$("#buttonContainer").html("<a href='javascript:cancelAnalysis()' class='button'>Cancel</a><br /><br />");
-			}
-		} else {
-			showMessage("No text provided.", 4000);
-		}
-	}
-
-	function analyseDocument(text) {
-		// Creates objects to clean up the text based on the selected language
-		var language = indexToLanguage[selectedLanguage];
-		var sanitiser = new Sanitiser(language);
-		var stemmerObject = new Stemmer(sanitiser, language);
-		var stoplist = new Stoplist(STOP_LISTS[language]);
-
-		TaskQueue.instance.add(new DocumentStatistics(text, stemmerObject, stoplist, showMessage));
-		TaskQueue.instance.add(new FunctionWrapper(displayDocumentStats));
-		TaskQueue.instance.start();
-	}
-
-	function analyseChatlog(text) {
-		var language = indexToLanguage[selectedLanguage];
-		var sanitiser = new Sanitiser(language);
-		var stemmerObject = new Stemmer(sanitiser, language);
-		var stoplist = new Stoplist(STOP_LISTS[language]);
-
-		TaskQueue.instance.add(new LogProcessor(text, stemmerObject, stoplist, showMessage));
-		TaskQueue.instance.add(new ChatStatistics(showMessage));
-		TaskQueue.instance.add(new FunctionWrapper(displayChatlogStats));
-		TaskQueue.instance.start();	
-	}
-
-	function analyseSourceFile(text) {
-		switch (selectedProgLanguage) {
-		case 0:
-			TaskQueue.instance.add(new HTMLStatistics(text, showMessage));
-			TaskQueue.instance.add(new FunctionWrapper(displayHTMLStats));
-			break;
-		case 1:
-			TaskQueue.instance.add(new JSStatistics(text, showMessage));
-			TaskQueue.instance.add(new FunctionWrapper(displayJSStats));
-			break;
-		case 2:
-			TaskQueue.instance.add(new JavaStatistics(text, showMessage));
-			TaskQueue.instance.add(new FunctionWrapper(displayJavaStats));
-			break;
-		case 3:
-			TaskQueue.instance.add(new CSStatistics(text, showMessage));
-			TaskQueue.instance.add(new FunctionWrapper(displayCSStats));
-			break;
-		case 4:
-			TaskQueue.instance.add(new CPPStatistics(text, showMessage));
-			TaskQueue.instance.add(new FunctionWrapper(displayCPPStats));
-			break;
-		}
-		TaskQueue.instance.start();
-	}
-
-	function cancelAnalysis() {
-		TaskQueue.instance.stop();
-
-		$("#buttonContainer").html(
-			"<a href='javascript:analyse()'' class='button'>Analyse</a><br /><br />");
-		// Hides message container then clears its content
-		$("#messageContainer").hide("fast").html("");
-	}
-
-	function returnToUploader() {
-		$("#resultsContainer").hide("fast");
-		$("#messageContainer").hide();
-		$("#buttonContainer").html("<a href='javascript:analyse()'' class='button'>Analyse</a><br /><br />");
-		
-		$("#formContainer").show("fast");
-	}
-
-	function setFeature(index) {
-		previousFeature = selectedFeature;
-		selectedFeature = index;
-		$("#featureID" + previousFeature).removeClass("selected");
-		$("#featureID" + selectedFeature).addClass("selected");
-
-		// Now shows the appropriate form
-		if (selectedFeature == 0 || selectedFeature == 1) {
-			if (previousFeature != 0 && previousFeature != 1) {
-				$("#options1").hide("fast");
-				$("#options0").show("fast");
-			}
-		} else if (selectedFeature == 2) {
-			if (previousFeature != 2) {
-				$("#options0").hide("fast");
-				$("#options1").show("fast");
-			}
-		}
-	}
-
-	function setLanguage(index) {
-		$("#languageID" + selectedLanguage).removeClass("selected");
-		selectedLanguage = index;
-		$("#languageID" + selectedLanguage).addClass("selected");
-	}
-
-	function setProgLanguage(index) {
-		$("#progLanguageID" + selectedProgLanguage).removeClass("selected");
-		selectedProgLanguage = index;
-		$("#progLanguageID" + selectedProgLanguage).addClass("selected");
-	}
-
-	</script>
+	<script type="text/javascript" src="../js/menu.js"></script>
+	<script type="text/javascript" src="../js/examples.js"></script>
 
 	<link rel="stylesheet" type="text/css" href="../css/reset.css" />
 	<link rel="stylesheet" type="text/css" href="../css/style.css" />
@@ -203,29 +64,35 @@
 						<tr><td><strong>URL:</strong></tds>
 						<td><input name="url" type="text" class="textbox" onchange="onURLChange()" /></td></tr>-->
 
-						<tr><td><strong>Raw text:</strong></td></tr>
-						<tr><td><textarea name="rawText" rows="15" cols="150" wrap="off"></textarea></td></tr>
+						<tr><td>
+							<p style="float: left"><strong>Raw text:</strong></p>
+							<p style="float: right"><a href="javascript:showExample()"
+							   title="Click this to load some example text, so you can see how it works!">
+							 Show Example</a></p>
+							<div style="clear: both"></div>
+						</tr></tr>
+						<tr><td><textarea name="rawText" colspan="2" rows="15" cols="150" wrap="off"></textarea></td></tr>
 						<tr><td><strong>Language of text:</strong></td></tr>
 					</table>
 				</form>
 
 				<div id="options0">
 					<div class="flagPadding"></div>
-					<a id="languageID0" class="language selected" href="javascript:setLanguage(0)" title="English">
+					<a id="languageID0" class="language selected tooltip" href="javascript:setLanguage(0)" title="English">
 					<img src="../images/flags/uk.png" alt="English" /></a>
-					<a id="languageID1" class="language" href="javascript:setLanguage(1)" title="Fran&#231;ais">
+					<a id="languageID1" class="language tooltip" href="javascript:setLanguage(1)" title="Fran&#231;ais">
 					<img src="../images/flags/fr.png" alt="Fran&#231;ais" /></a>
-					<a id="languageID2" class="language" href="javascript:setLanguage(2)" title="Deutsch">
+					<a id="languageID2" class="language tooltip" href="javascript:setLanguage(2)" title="Deutsch">
 					<img src="../images/flags/de.png" alt="Deutsch" /></a>
-					<a id="languageID3" class="language" href="javascript:setLanguage(3)" title="Italiano">
+					<a id="languageID3" class="language tooltip" href="javascript:setLanguage(3)" title="Italiano">
 					<img src="../images/flags/it.png" alt="Italiano" /></a>
-					<a id="languageID4" class="language" href="javascript:setLanguage(4)" title="Espa&#241;ol">
+					<a id="languageID4" class="language tooltip" href="javascript:setLanguage(4)" title="Espa&#241;ol">
 					<img src="../images/flags/es.png" alt="Espa&#241;ol" /></a>
-					<a id="languageID5" class="language" href="javascript:setLanguage(5)" title="Portugu&#234;s">
+					<a id="languageID5" class="language tooltip" href="javascript:setLanguage(5)" title="Portugu&#234;s">
 					<img src="../images/flags/pt.png" alt="Portugu&#234;s" /></a>
-					<a id="languageID6" class="language" href="javascript:setLanguage(6)" title="Svenska">
+					<a id="languageID6" class="language tooltip" href="javascript:setLanguage(6)" title="Svenska">
 					<img src="../images/flags/se.png" alt="Svenska" /></a>
-					<a id="languageID7" class="language" href="javascript:setLanguage(7)" title="Suomi">
+					<a id="languageID7" class="language tooltip" href="javascript:setLanguage(7)" title="Suomi">
 					<img src="../images/flags/fi.png" alt="Suomi" /></a>
 					<div class="flagPadding"></div>
 				</div>

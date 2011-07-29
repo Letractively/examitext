@@ -22,19 +22,24 @@ function showResultContainer() {
 	$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
 }
 
-
-function generateTable(title, headings, data) {
+function generateTable(title, headings, data, tooltips) {
 	var table = "<table style='margin: 0 auto'>";
 	if (title && title != "") {
 		table += "<tr><th colspan='" + headings.length + "'><span class='top1 text_center'>" + title + "</span.</th></tr><tr>";
 	}
 
 	table += "<tr>";
-	for (var i in headings) {
-		table += "<th>" + headings[i] + "</th>";
+	if (tooltips) {
+		for (var i = 0; (i < headings.length); ++i) {
+			table += "<th class='tooltip' title='" + tooltips[i] + "'>" + headings[i] + "</th>";
+		}
+	} else { // don't add titles if tooltips weren't provided
+		for (var i = 0; (i < headings.length); ++i) {
+			table += "<th>" + headings[i] + "</th>";
+		}
 	}
 	table += "</tr><tr>";
-	for (var i in data) {
+	for (var i = 0; (i < data.length); ++i) {
 		table += "<td>" + data[i] + "</td>";
 	}
 	table += "</tr></table>";
@@ -72,13 +77,18 @@ function generateClassHierarchy(node, depth) {
 function displayDocumentStats(stats) {
 	showMessage("Generating display...");
 	
-	var statTable = generateTable("", ["Words", "Sentences", "Lines", "Paragraphs", "Average Sentence Length",
-		"Average Paragraph Length"], [stats.wordCount, stats.sentenceCount, stats.lineCount,
-		stats.getParagraphCount(), roundNumber(stats.averageSentenceLength, 2),
-		roundNumber(stats.getAverageParagraphLength(), 2)]);
+	var statTable = generateTable("Statistics",
+		["Words", "Sentences", "Lines", "Paragraphs", "Average Sentence Length", "Average Paragraph Length"],
+		[stats.wordCount, stats.sentenceCount, stats.lineCount, stats.getParagraphCount(),
+		roundNumber(stats.averageSentenceLength, 2), roundNumber(stats.getAverageParagraphLength(), 2)],
+		["Total number of words in the document.", "Total number of sentences in the document.",
+		 "Number of lines in the documemnt.", "Total number of paragraphs in the document.",
+		 "Length of an average sentence in the document.", "Length of an average paragraph in the document."]);
 
-	var topWordsTable = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" +
-		"Top 10 Words</span></th></tr><tr><th>Word</th><th>Frequency</th><th>Relative Frequency</th></tr>";
+	var topWordsTable = "<table class='topTable'><tr><th colspan='3'>" +
+		"<span class='top1 text_center tooltip' title='10 most frequently occuring words (after stemming" +
+		" and filtering out common words).'>Top 10 Words</span></th></tr><tr><th>Word</th><th>Frequency</th>" +
+		"<th>Relative Frequency</th></tr>";
 	var topWords = stats.getMostSaidWords(10);
 	for (var i in topWords) {
 		if (i >= 0 && i <= 2) { // large size fonts for top 3
@@ -92,8 +102,9 @@ function displayDocumentStats(stats) {
 	}
 	topWordsTable += "</table>";
 
-	var punctuationTable = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" +
-		"Punctuation</span></th></tr><tr><th>Punctuation</th><th>Frequency</th></tr>";
+	var punctuationTable = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center tooltip'" +
+		"title='Amount of time each punctuation mark occurred.'>Punctuation</span></th></tr>" +
+		"<tr><th>Punctuation</th><th>Frequency</th></tr>";
 	var characters = [ ".", ",", ";", ":", "?", "!", "\'", "\"", "-" ];
 	for (var i in characters) {
 		var ch = characters[i];
@@ -119,9 +130,13 @@ function displayChatlogStats(stats) {
 	showMessage("Generating display...");
 
 	// Now interpret them and show them
-	var statTable =  "<table style='margin: 0 auto'><tr><th>Participant</th>" +
-	"<th>Percent of Messages</th><th>Number of Messages</th><th>Average Message " +
-	"Length</th><th>Average Message Density</th><th>Word Count</th></tr>";
+	var statTable =  "<table style='margin: 0 auto'><tr>" +
+	"<th class='tooltip' title='Name of each participant.'>Participant</th>" +
+	"<th class='tooltip' title='Percent of the total messages that were contributed by each participant.'>Percent of Messages</th>" +
+	"<th class='tooltip' title='Total number of messages each participant made.'>Number of Messages</th>" +
+	"<th class='tooltip' title=\"Each participant's average message length (in characters).\">Average Message Length</th>" +
+	"<th class='tooltip' title='The average number of consecutive messages sent by each participant.'>Average Message Density</th>" +
+	"<th class='tooltip' title='Total number of words sent by each participant (after stemming and filtering out common words).'>Word Count</th></tr>";
 	var pieChartData = [ ];
 
 	for (var name in stats.participants) {
@@ -138,7 +153,8 @@ function displayChatlogStats(stats) {
 	// Generates tables to show the top 10 words for each participant
 	var topWordTables = [];
 	for (var name in stats.participants) {
-		var current = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center'>" + name +
+		var current = "<table class='topTable'><tr><th colspan='3'><span class='top1 text_center tooltip'" + 
+			"title=\"" + name + "'s top 10 most frequently said words.\">" + name +
 			"'s Top 10 Words</span></th></tr><tr><th>Word</th><th>Frequency</th><th>Relative Frequency</th></tr>";
 
 		var topWords = stats.participants[name].getMostSaidWords(10);

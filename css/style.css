@@ -9,12 +9,15 @@ body {
 	font-size: 12px;
 	color: #444;
 }
-body p { padding: 5px; }
-body strong { font-weight: bold; }
-body table td { padding: 5px; }
+p { padding: 5px; }
+strong { font-weight: bold; }
+table td { padding: 5px; }
 /* Makes textarea stretch to 100% and unresizable. */
-textarea { resize: none; width:100%; }
+textarea { resize: none; width: 100%; }
 /*.textwrapper { border:1px solid #999; margin:5px 0; padding:3px; }*/
+
+a:link, a:visited { color: #000; font-weight: bold; }
+a:hover, a:active { color: #48F; font-weight: bold; }
 
 ul {
 	font-size: 14px; font-weight: bold; text-indent: 0px;
@@ -97,7 +100,7 @@ li span { color: #000; font-weight: normal; }
 .classHierarchy { padding: 10px 10px; font-size: 16px; font-weight: bold; color: #48F; float: bottom; }
 
 #areaGraphContainer { padding-top: 20px; width: 760px; height: 300px; }
-#pieChartContainer { width: 760px; height: 300px; }
+#pieChartContainer { width: 760px; height: 300px; padding-top: 20px; }
 
 /* Generated using http://www.cssbuttongenerator.com/ */
 .button {
@@ -114,7 +117,7 @@ li span { color: #000; font-weight: normal; }
 
 	border:1px solid #dcdcdc;
 	display:inline-block;
-	color:#777777;
+	color:#777777 !important;
 	font-family:arial;
 	font-size:15px;
 	font-weight:bold;
