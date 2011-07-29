@@ -61,7 +61,7 @@ function generateClassHierarchy(node, depth) {
 	var markup = "";
 
 	if (depth == 0) markup += "<ul>";
-	markup += "<li class='hierarchyNode' title='" + node.description + "'><span>" + node.name + "<span></li>";
+	markup += "<li class='hierarchyNode tooltip' title='" + node.description + "'><span>" + node.name + "<span></li>";
 
 	markup += "<ul>";
 	for (var name in node.children) {

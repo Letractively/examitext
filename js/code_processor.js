@@ -841,6 +841,7 @@ CSStatistics.prototype.processOO = function () {
 			var depth = 0;
 			do {
 				token = this.tokens[i];
+				if (!token) break;
 				i += 1;
 
 				if (token == "{") {
@@ -865,7 +866,6 @@ CSStatistics.prototype.processOO = function () {
 							}
 						}
 					}
-
 				}
 			} while (depth > 0);
 
