@@ -13,7 +13,7 @@ p { padding: 5px; }
 strong { font-weight: bold; }
 table td { padding: 5px; }
 /* Makes textarea stretch to 100% and unresizable. */
-textarea { resize: none; width: 100%; }
+textarea { resize: none; width: 100%; white-space: pre; overflow: auto; }
 /*.textwrapper { border:1px solid #999; margin:5px 0; padding:3px; }*/
 
 a:link, a:visited { color: #000; font-weight: bold; }
@@ -136,4 +136,13 @@ li span { color: #000; font-weight: normal; }
 }.button:active {
 	position:relative;
 	top:1px;
+}
+
+/* Used by the EasyTooltip script. */
+#easyTooltip {
+	padding: 5px;
+	border: 2px solid #8CF;
+	background:#f1f1f1;
+	background: #48F;
+	color: #FFF;
 }

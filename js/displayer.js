@@ -20,6 +20,14 @@ function showResultContainer() {
 	$("#formContainer").hide("fast");
 
 	$("#buttonContainer").html("<a href='javascript:returnToUploader()' class='button'>Return</a><br /><br />");
+
+	generateTooltips();
+}
+
+function generateTooltips() {
+	$(document).ready(function() {
+		$(".tooltip").easyTooltip();
+	});
 }
 
 function generateTable(title, headings, data, tooltips) {

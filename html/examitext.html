@@ -14,6 +14,7 @@
 	<script type="text/javascript" src="../js/snowball.js"></script>
 	<script type="text/javascript" src="../js/htmlparser.js"></script>
 	<script type="text/javascript" src="../js/split.js"></script>
+	<script type="text/javascript" src="../js/easytooltip.js"></script>
 
 	<!-- Examitext Files -->
 	<script type="text/javascript" src="../js/highcharts_wrapper.js"></script>
@@ -66,12 +67,14 @@
 
 						<tr><td>
 							<p style="float: left"><strong>Raw text:</strong></p>
-							<p style="float: right"><a href="javascript:showExample()"
+							<p style="float: right"><a href="javascript:showExample()" class="tooltip"
 							   title="Click this to load some example text, so you can see how it works!">
 							 Show Example</a></p>
 							<div style="clear: both"></div>
-						</tr></tr>
-						<tr><td><textarea name="rawText" colspan="2" rows="15" cols="150" wrap="off"></textarea></td></tr>
+						</td></tr>
+						<tr><td>
+							<textarea id="rawText" rows="15" cols="150"></textarea>
+						</td></tr>
 						<tr><td><strong>Language of text:</strong></td></tr>
 					</table>
 				</form>
@@ -98,15 +101,15 @@
 				</div>
 				<div id="options1">
 					<div class="progLanguagePadding"></div>
-					<a id="progLanguageID0" class="language selected" href="javascript:setProgLanguage(0)" title="HTML">
+					<a id="progLanguageID0" class="language selected tooltip" href="javascript:setProgLanguage(0)" title="HTML">
 					<img src="../images/proglanguages/html.png" alt="HTML" /></a>
-					<a id="progLanguageID1" class="language" href="javascript:setProgLanguage(1)" title="JavaScript">
+					<a id="progLanguageID1" class="language tooltip" href="javascript:setProgLanguage(1)" title="JavaScript">
 					<img src="../images/proglanguages/js.png" alt="JavaScript" /></a>
-					<a id="progLanguageID2" class="language" href="javascript:setProgLanguage(2)" title="Java">
+					<a id="progLanguageID2" class="language tooltip" href="javascript:setProgLanguage(2)" title="Java">
 					<img src="../images/proglanguages/java.png" alt="Java" /></a>
-					<a id="progLanguageID3" class="language" href="javascript:setProgLanguage(3)" title="C#">
+					<a id="progLanguageID3" class="language tooltip" href="javascript:setProgLanguage(3)" title="C#">
 					<img src="../images/proglanguages/cs.png" alt="C#" /></a>
-					<a id="progLanguageID4" class="language" href="javascript:setProgLanguage(4)" title="C++">
+					<a id="progLanguageID4" class="language tooltip" href="javascript:setProgLanguage(4)" title="C++">
 					<img src="../images/proglanguages/cpp.png" alt="C++" /></a>
 					<div class="progLanguagePadding"></div>
 				</div>
@@ -138,6 +141,8 @@
 		$("#container").center_screen();
 		$("#messageContainer").hide();
 		$("#options1").hide();
+
+		generateTooltips();
 	</script>
 
 </body>
