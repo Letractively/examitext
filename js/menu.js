@@ -16,7 +16,7 @@ var selectedProgLanguage = 0;
 
 /* Retrives text from the raw text area. */
 function getText() {
-	var rawText = document.forms("logForm").elements["rawText"];
+	var rawText = document.forms["logForm"].elements["rawText"];
 	return rawText.value;
 }
 
