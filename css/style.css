@@ -14,7 +14,6 @@ strong { font-weight: bold; }
 table td { padding: 5px; }
 /* Makes textarea stretch to 100% and unresizable. */
 textarea { resize: none; width: 100%; white-space: pre; overflow: auto; }
-/*.textwrapper { border:1px solid #999; margin:5px 0; padding:3px; }*/
 
 a:link, a:visited { color: #000; font-weight: bold; }
 a:hover, a:active { color: #48F; font-weight: bold; }
@@ -84,7 +83,7 @@ li span { color: #000; font-weight: normal; }
 
 
 /* Upload related classes. */
-#formContainer table { width: 780px; position: relative; top: 10px; left: 10px; }
+#formContainer table { position: relative; top: 10px; left: 10px; }
 #formContainer textarea { width: 760px; }
 
 #messageContainer { padding: 20px; }
@@ -136,6 +135,10 @@ li span { color: #000; font-weight: normal; }
 }.button:active {
 	position:relative;
 	top:1px;
+}
+
+.smallText {
+	font-size: 10px;
 }
 
 /* Used by the EasyTooltip script. */

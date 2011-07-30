@@ -48,6 +48,7 @@
 		</div>
 
 		<div id="content">
+
 			<div id="formContainer">
 				<div class="featurePadding"></div>
 				<a id="featureID0" class="feature selected" href="javascript:setFeature(0)">
@@ -61,17 +62,40 @@
 				<!-- Done for Firefox compatibility. -->
 				<div style="clear: both;"></div>
 
-				<form name="logForm" action="#">
+				<form id="logForm" action="examitext.php" method="post" enctype="multipart/form-data">
+
 					<table>
-						<tr><td>
-							<p style="float: left"><strong>Raw text:</strong></p>
-							<p style="float: right"><a href="javascript:showExample()" class="tooltip"
-							   title="Click this to load some example text, so you can see how it works!">
-							 Show Example</a></p>
+						<!-- Used to tell PHP code whether user is uploading file from their
+						     computer or downloading one from another website. -->
+						<input name="task" value="none" type="hidden" />
+						<tr>
+							<td>
+								<strong>Upload File:</strong><span style="padding-left: 30px"></span>
+								<input name="localFile" type="file" /><span style="padding-left: 10px"></span>
+							</td>
+							<td>
+								<button onclick="uploadFile()" class="tooltip"
+									title="Upload a file from your computer!"> Upload</button>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<strong>URL:</strong><span style="padding-left: 78px"></span>
+								<input name="url" type="text" class="textbox" size="60" /><span style="padding-left: 92px"></span>
+							</td>
+							<td>
+								<button onclick="downloadFile()" class="tooltip" title="Download a file from a remote URL!">Download</button>
+							</td>
+						</tr>
+						<tr><td colspan="2">
+							<span style="float: left"><strong>Raw text:</strong></span>
+							<span style="float: right"><a href="javascript:showExample()" class="tooltip"
+							title="Click this to load some example text, so you can see how it works!">
+							Show Example</a></span>
 							<div style="clear: both"></div>
 						</td></tr>
-						<tr><td>
-							<textarea id="rawText" rows="15" cols="150"></textarea>
+						<tr><td colspan="2">
+							<textarea id="rawText" rows="15" cols="150" colspan="3"></textarea>
 						</td></tr>
 						<tr><td><strong>Language of text:</strong></td></tr>
 					</table>
@@ -133,6 +157,50 @@
 		</div>
 	</div>
 
+	<?php
+	$fullText = "";
+	$errorMessage = "";
+
+	if (isset($_POST['task'])) {
+		$success = false;
+		
+		if ($_POST['task'] == "file") {
+			if ($_FILES['localFile']['error'] === UPLOAD_ERR_OK) {
+				$file = fopen($_FILES['localFile']['tmp_name'], "r");
+				if (!$file) $errorMessage = "Could not read uploaded file.";
+				else $success = true;
+			} else {
+				$errorMessage = "File was not uploaded correctly.";
+			}
+
+		} else if ($_POST['task'] == "url") {
+			if ($_POST['url'] == "") {
+				$errorMessage = "No URL given.";
+			} else {
+				$file = fopen($_POST['url'], "rb");
+				if (!$file)
+					$errorMessage = "Unable to read file at $_POST[url].";
+				else
+					$success = true;
+			}
+		}
+
+		if ($success) {
+			// Reads all of the file in as text
+			$lines = array();
+			while (!feof($file)) {
+				array_push($lines, fgets($file, 1024));
+			}
+
+			fclose($file);
+
+			// Joins up all the lines with a line separator and sends
+			// the text to JavaScript
+			$fullText = implode("\n", $lines);
+		}
+	}
+	?>
+
 	<!-- We center the container here since it's been populated with all
 	     its content by this point. -->
 	<script type="text/javascript">
@@ -141,6 +209,58 @@
 		$("#options1").hide();
 
 		generateTooltips();
+
+		/* Called whenever the user tries to upload/download a file to the application */
+		function uploadFile() {
+			var form = document.forms[0];
+			form.elements["task"].value = "file";
+
+			saveMenuState(form);
+			form.submit();
+		}
+
+		function downloadFile() {
+			var form = document.forms[0];
+			form.elements["task"].value = "url";
+
+			saveMenuState(form);
+			form.submit();
+		}
+
+		/* Adds new hidden fields to the form so the state of the menu
+		 * (what feature/language is selected) is preserved when the page
+		 * is refereshed. */
+		function saveMenuState(form) {
+			$("#logForm").append(
+				"<input type='hidden' name='featureSelected' value='" + selectedFeature + "' />" +
+				"<input type='hidden' name='languageSelected' value='" + selectedLanguage + "' />" +
+				"<input type='hidden' name='progLanguageSelected' value='" + selectedProgLanguage + "' />"
+			);
+		}
+
+		// Checks if there's some text that's been uploaded/download
+		// and places it in the raw text area
+		var fullText = <?php echo json_encode($fullText); ?>;
+		setText(fullText);
+
+		<?php
+		if ($errorMessage) {
+			$encoded = json_encode($errorMessage);
+			echo "showMessage($encoded, 3000); ";
+		}
+		if (isset($_POST["featureSelected"])) {
+			$index = $_POST["featureSelected"];
+			echo "setFeature($index); ";
+		}
+		if (isset($_POST["languageSelected"])) {
+			$index = $_POST["languageSelected"];
+			echo "setLanguage($index); ";
+		}
+		if (isset($_POST["progLanguageSelected"])) {
+			$index = $_POST["progLanguageSelected"];
+			echo "setProgLanguage($index); ";
+		}
+		?>
 	</script>
 
 </body>
